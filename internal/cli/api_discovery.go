@@ -32,82 +32,119 @@ Run 'api <interface>' to see that interface's methods.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			root := cmd.Root()
 
-			if len(args) > 0 {
-				target := strings.ToLower(args[0])
-				for _, child := range root.Commands() {
-					if child.Hidden && strings.ToLower(child.Name()) == target {
-						methods := child.Commands()
-						// JSON envelope: {interface, short, methods: [{name, short}, ...]}.
-						if flags.asJSON {
-							methodList := make([]map[string]any, 0, len(methods))
-							for _, method := range methods {
-								methodList = append(methodList, map[string]any{
-									"name":  method.Name(),
-									"short": method.Short,
-								})
-							}
-							return printJSONFiltered(cmd.OutOrStdout(), map[string]any{
-								"interface": child.Name(),
-								"short":     child.Short,
-								"methods":   methodList,
-							}, flags)
-						}
-						if len(methods) == 0 {
-							return child.Help()
-						}
-						fmt.Fprintf(cmd.OutOrStdout(), "%s — %s\n\nMethods:\n", child.Name(), child.Short)
-						for _, method := range methods {
-							fmt.Fprintf(cmd.OutOrStdout(), "  %-50s %s\n", child.Name()+" "+method.Name(), method.Short)
-						}
-						fmt.Fprintf(cmd.OutOrStdout(), "\nUse 'datpaq %s <method> --help' for details.\n", child.Name())
-						return nil
+			// Build per-interface metadata by walking root.Commands() twice:
+			// once for hidden-parent groups (the "raw" multi-endpoint
+			// interfaces), once for promoted top-level commands (which carry
+			// pp:endpoint annotations but aren't registered as Hidden).
+			// The old implementation only counted hidden parents and missed
+			// promoted interfaces like 'whois', 'current-time', and
+			// 'web-screenshot' — which is why the active count was 9 instead
+			// of 13.
+			type ifaceMeta struct {
+				short string
+				cmd   *cobra.Command // hidden-parent for multi-endpoint, leaf for promoted
+			}
+			meta := map[string]*ifaceMeta{}
+			for _, child := range root.Commands() {
+				name := child.Name()
+				if child.Hidden {
+					// Multi-endpoint resource group — child IS the interface
+					// parent; its methods are its cobra children.
+					meta[name] = &ifaceMeta{short: child.Short, cmd: child}
+					continue
+				}
+				if child.Annotations[annEndpoint] != "" {
+					// Promoted top-level command — derive the interface name
+					// from the annotation, since cobra Name() is the
+					// command-line name (matches in this case).
+					iface, _, _ := strings.Cut(child.Annotations[annEndpoint], ".")
+					if iface == "" {
+						iface = name
+					}
+					if _, exists := meta[iface]; !exists {
+						meta[iface] = &ifaceMeta{short: child.Short, cmd: child}
 					}
 				}
-				return fmt.Errorf("interface %q not found. Run 'datpaq api' to list all interfaces", args[0])
 			}
 
-			// Pre-formatting human strings ahead of time would block the JSON
-			// path from emitting clean field values; build the typed slice and
-			// derive human format on print.
+			if len(args) > 0 {
+				target := strings.ToLower(args[0])
+				m, ok := meta[target]
+				if !ok {
+					return fmt.Errorf("interface %q not found. Run 'datpaq api' to list all interfaces", args[0])
+				}
+
+				// Multi-endpoint: enumerate cobra children. Single-endpoint
+				// (promoted): synthesize a one-row methods view from the
+				// command itself so the UX stays uniform.
+				type methodRow struct {
+					Name  string `json:"name"`
+					Short string `json:"short"`
+				}
+				var rows []methodRow
+				if m.cmd.Hidden && m.cmd.HasSubCommands() {
+					for _, mc := range m.cmd.Commands() {
+						rows = append(rows, methodRow{Name: mc.Name(), Short: mc.Short})
+					}
+				} else {
+					// Promoted: the interface and the method are the same
+					// command. Use the cobra Use name (just the verb) for
+					// the row label.
+					rows = append(rows, methodRow{Name: m.cmd.Name(), Short: m.cmd.Short})
+				}
+
+				if flags.asJSON {
+					methodList := make([]map[string]any, 0, len(rows))
+					for _, r := range rows {
+						methodList = append(methodList, map[string]any{"name": r.Name, "short": r.Short})
+					}
+					return printJSONFiltered(cmd.OutOrStdout(), map[string]any{
+						"interface": target,
+						"short":     m.short,
+						"methods":   methodList,
+					}, flags)
+				}
+				fmt.Fprintf(cmd.OutOrStdout(), "%s — %s\n\nMethods:\n", target, m.short)
+				for _, r := range rows {
+					fmt.Fprintf(cmd.OutOrStdout(), "  %-50s %s\n", target+" "+r.Name, r.Short)
+				}
+				fmt.Fprintf(cmd.OutOrStdout(), "\nUse 'datpaq %s <method> --help' for details.\n", target)
+				return nil
+			}
+
+			// No args: list interfaces.
 			type ifaceEntry struct {
 				Name  string `json:"name"`
 				Short string `json:"short"`
 			}
-			// totalHidden tracks the unfiltered count so the human-format
-			// listing can show "13 of 36" — gives operators a hint that a
-			// filter is in effect rather than making the dropped interfaces
-			// invisible.
 			var ifaces []ifaceEntry
-			totalHidden := 0
-			for _, child := range root.Commands() {
-				if !child.Hidden {
+			for name, m := range meta {
+				if !isActiveInterface(name) {
 					continue
 				}
-				totalHidden++
-				if !isActiveInterface(child.Name()) {
-					continue
-				}
-				ifaces = append(ifaces, ifaceEntry{Name: child.Name(), Short: child.Short})
+				ifaces = append(ifaces, ifaceEntry{Name: name, Short: m.short})
 			}
 			sort.Slice(ifaces, func(i, j int) bool { return ifaces[i].Name < ifaces[j].Name })
 
-			// JSON envelope: {interfaces: [...], note?: "..."}.
 			if flags.asJSON {
 				out := map[string]any{"interfaces": ifaces}
 				if len(ifaces) == 0 {
 					out["interfaces"] = []ifaceEntry{}
-					out["note"] = "No hidden API interfaces found."
+					out["note"] = "No active API interfaces found."
 				}
 				return printJSONFiltered(cmd.OutOrStdout(), out, flags)
 			}
 
 			if len(ifaces) == 0 {
-				fmt.Fprintln(cmd.OutOrStdout(), "No hidden API interfaces found.")
+				fmt.Fprintln(cmd.OutOrStdout(), "No active API interfaces found.")
 				return nil
 			}
 
-			if activeAPICount() > 0 && totalHidden > len(ifaces) {
-				fmt.Fprintf(cmd.OutOrStdout(), "Available API interfaces (%d of %d active):\n\n", len(ifaces), totalHidden)
+			// Label uses "N active" when a curated active-set is in effect,
+			// "N interfaces" otherwise. Avoids the "N of M" form since N is
+			// the only number that matters to the reader.
+			if activeAPICount() > 0 {
+				fmt.Fprintf(cmd.OutOrStdout(), "Available API interfaces (%d active):\n\n", len(ifaces))
 			} else {
 				fmt.Fprintf(cmd.OutOrStdout(), "Available API interfaces (%d):\n\n", len(ifaces))
 			}

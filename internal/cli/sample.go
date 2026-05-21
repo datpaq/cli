@@ -204,8 +204,8 @@ func listInterfaces(w io.Writer, all []endpointInfo) {
 	}
 	sort.Strings(visible)
 
-	if activeAPICount() > 0 && len(seenAll) > len(visible) {
-		fmt.Fprintf(w, "Available interfaces (%d of %d active):\n\n", len(visible), len(seenAll))
+	if activeAPICount() > 0 {
+		fmt.Fprintf(w, "Available interfaces (%d active):\n\n", len(visible))
 	} else {
 		fmt.Fprintf(w, "Available interfaces (%d):\n\n", len(visible))
 	}
