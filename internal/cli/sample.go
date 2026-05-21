@@ -184,30 +184,40 @@ func endpointsForInterface(all []endpointInfo, iface string) []endpointInfo {
 	return out
 }
 
-// listInterfaces prints every interface that has at least one sampleable
-// endpoint, deduped and sorted. Format intentionally mirrors `datpaq api`
+// listInterfaces prints every ACTIVE interface that has at least one
+// sampleable endpoint, deduped and sorted. Format mirrors `datpaq api`
 // so the two commands feel like siblings.
+//
+// Filtering matches the api command: only active interfaces appear in
+// the listing, but `datpaq sample <inactive-iface> <method>` still works
+// — activation gates discovery, never capability.
 func listInterfaces(w io.Writer, all []endpointInfo) {
-	seen := map[string]int{}
+	seenAll := map[string]int{}
 	for _, ep := range all {
-		seen[ep.iface]++
+		seenAll[ep.iface]++
 	}
-	names := make([]string, 0, len(seen))
-	for name := range seen {
-		names = append(names, name)
+	visible := make([]string, 0, len(seenAll))
+	for name := range seenAll {
+		if isActiveInterface(name) {
+			visible = append(visible, name)
+		}
 	}
-	sort.Strings(names)
+	sort.Strings(visible)
 
-	fmt.Fprintf(w, "Available interfaces (%d):\n\n", len(names))
+	if activeAPICount() > 0 && len(seenAll) > len(visible) {
+		fmt.Fprintf(w, "Available interfaces (%d of %d active):\n\n", len(visible), len(seenAll))
+	} else {
+		fmt.Fprintf(w, "Available interfaces (%d):\n\n", len(visible))
+	}
 	maxName := 0
-	for _, n := range names {
+	for _, n := range visible {
 		if len(n) > maxName {
 			maxName = len(n)
 		}
 	}
-	for _, n := range names {
-		fmt.Fprintf(w, "  %-*s  %d method", maxName, n, seen[n])
-		if seen[n] != 1 {
+	for _, n := range visible {
+		fmt.Fprintf(w, "  %-*s  %d method", maxName, n, seenAll[n])
+		if seenAll[n] != 1 {
 			fmt.Fprint(w, "s")
 		}
 		fmt.Fprintln(w)

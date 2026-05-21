@@ -73,11 +73,21 @@ Run 'api <interface>' to see that interface's methods.`,
 				Name  string `json:"name"`
 				Short string `json:"short"`
 			}
+			// totalHidden tracks the unfiltered count so the human-format
+			// listing can show "13 of 36" — gives operators a hint that a
+			// filter is in effect rather than making the dropped interfaces
+			// invisible.
 			var ifaces []ifaceEntry
+			totalHidden := 0
 			for _, child := range root.Commands() {
-				if child.Hidden {
-					ifaces = append(ifaces, ifaceEntry{Name: child.Name(), Short: child.Short})
+				if !child.Hidden {
+					continue
 				}
+				totalHidden++
+				if !isActiveInterface(child.Name()) {
+					continue
+				}
+				ifaces = append(ifaces, ifaceEntry{Name: child.Name(), Short: child.Short})
 			}
 			sort.Slice(ifaces, func(i, j int) bool { return ifaces[i].Name < ifaces[j].Name })
 
@@ -96,11 +106,15 @@ Run 'api <interface>' to see that interface's methods.`,
 				return nil
 			}
 
-			fmt.Fprintf(cmd.OutOrStdout(), "Available API interfaces (%d):\n\n", len(ifaces))
+			if activeAPICount() > 0 && totalHidden > len(ifaces) {
+				fmt.Fprintf(cmd.OutOrStdout(), "Available API interfaces (%d of %d active):\n\n", len(ifaces), totalHidden)
+			} else {
+				fmt.Fprintf(cmd.OutOrStdout(), "Available API interfaces (%d):\n\n", len(ifaces))
+			}
 			for _, e := range ifaces {
 				fmt.Fprintf(cmd.OutOrStdout(), "  %-45s %s\n", e.Name, e.Short)
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "\nUse '%s-pp-cli api <interface>' to see methods.\n", "datpaq")
+			fmt.Fprintln(cmd.OutOrStdout(), "\nUse 'datpaq api <interface>' to see methods.")
 			return nil
 		},
 	}
