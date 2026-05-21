@@ -104,11 +104,26 @@ Run 'api <interface>' to see that interface's methods.`,
 						"methods":   methodList,
 					}, flags)
 				}
+				// Single-endpoint promoted interfaces (e.g. whois, current-time)
+				// have one row whose name happens to equal the interface name.
+				// "whois whois" reads as a typo; collapse it to "whois (single
+				// endpoint)" and adjust the help-hint to match the actual
+				// invocation shape ('datpaq whois --help', no method slot).
+				singleEndpoint := len(rows) == 1 && rows[0].Name == target
+
 				fmt.Fprintf(cmd.OutOrStdout(), "%s — %s\n\nMethods:\n", target, m.short)
 				for _, r := range rows {
-					fmt.Fprintf(cmd.OutOrStdout(), "  %-50s %s\n", target+" "+r.Name, r.Short)
+					label := target + " " + r.Name
+					if singleEndpoint {
+						label = target + " (single endpoint)"
+					}
+					fmt.Fprintf(cmd.OutOrStdout(), "  %-50s %s\n", label, r.Short)
 				}
-				fmt.Fprintf(cmd.OutOrStdout(), "\nUse 'datpaq %s <method> --help' for details.\n", target)
+				if singleEndpoint {
+					fmt.Fprintf(cmd.OutOrStdout(), "\nUse 'datpaq %s --help' for details.\n", target)
+				} else {
+					fmt.Fprintf(cmd.OutOrStdout(), "\nUse 'datpaq %s <method> --help' for details.\n", target)
+				}
 				return nil
 			}
 
