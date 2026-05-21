@@ -1,7 +1,9 @@
 // Copyright 2026 forgetfoo. Licensed under Apache-2.0. See LICENSE.
 // Hand-authored: terminal port of the website's console-banner.tsx. Same
 // glyphs, same 6-stop gradient, same 12-segment-per-line interpolation.
-// Source: ~/Desktop/datpaq/website/src/components/console-banner.tsx
+// Source of truth: console-banner.tsx in the datpaq website repo
+// (src/components/console-banner.tsx). Keep the gradient stops and ASCII
+// glyphs in sync with that file if it changes.
 //
 // 24-bit ANSI is used directly (no lipgloss dependency) to match the
 // existing `red`/`green`/`bold` helpers in helpers.go.
