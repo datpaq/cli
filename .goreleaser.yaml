@@ -1,0 +1,51 @@
+version: 2
+project_name: datpaq
+changelog:
+  disable: true
+builds:
+  - id: datpaq
+    main: ./cmd/datpaq
+    binary: datpaq
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X github.com/datpaq/cli/internal/cli.version={{ .Version }}
+    targets:
+      - darwin_amd64
+      - darwin_arm64
+      - linux_amd64
+      - linux_arm64
+      - windows_amd64
+      - windows_arm64
+  - id: datpaq-mcp
+    main: ./cmd/datpaq-mcp
+    binary: datpaq-mcp
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+    targets:
+      - darwin_amd64
+      - darwin_arm64
+      - linux_amd64
+      - linux_arm64
+      - windows_amd64
+      - windows_arm64
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+checksum:
+  name_template: checksums.txt
+brews:
+  - name: datpaq
+    repository:
+      owner: forgetfoo
+      name: homebrew-tap
+    homepage: "https://github.com/forgetfoo/datpaq"
+    description: "Comprehensive multi-service API platform providing aviation, geolocation, financial, utilities, image processing,..."
+    install: |
+      bin.install "datpaq"
+      bin.install "datpaq-mcp"

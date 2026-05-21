@@ -1,0 +1,39 @@
+{
+  "manifest_version": "0.3",
+  "name": "datpaq-mcp",
+  "display_name": "Datpaq Proapi",
+  "version": "4.10.0",
+  "description": "Datpaq Proapi API surface as MCP tools.",
+  "author": {
+    "name": "CLI Printing Press"
+  },
+  "license": "Apache-2.0",
+  "server": {
+    "type": "binary",
+    "entry_point": "bin/datpaq-mcp",
+    "mcp_config": {
+      "command": "${__dirname}/bin/datpaq-mcp",
+      "args": [],
+      "env": {
+        "DATPAQ_API_KEY_HEADER": "${user_config.datpaq_api_key_header}"
+      }
+    }
+  },
+  "user_config": {
+    "datpaq_api_key_header": {
+      "type": "string",
+      "title": "DATPAQ_API_KEY_HEADER",
+      "description": "Sets DATPAQ_API_KEY_HEADER for the Datpaq Proapi MCP server.",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=1.0.0",
+    "platforms": [
+      "darwin",
+      "linux",
+      "win32"
+    ]
+  }
+}
