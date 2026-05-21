@@ -195,6 +195,34 @@ func RenderSplash(w io.Writer) {
 	fmt.Fprintln(w)
 }
 
+// installTrailingNewline adds a blank line to stdout after every successful
+// command, so dense output doesn't run flush against the next prompt.
+//
+// Gating is deliberately conservative:
+//   - TTY only — a pipeline like `datpaq … | jq` would otherwise get an
+//     extra blank line at EOF and break parsers that expect strict JSON.
+//   - Skip machine-output modes (--json, --csv, --quiet, --plain, --agent)
+//     even in a TTY: those flags signal "I want raw output, no chrome."
+//   - Skip on error: cobra doesn't call PersistentPostRunE when RunE
+//     returned an error, so failure messages stay flush with the prompt
+//     automatically — no extra check needed here.
+//
+// Cobra's PersistentPostRunE walks up the parent chain and runs the first
+// hook it finds, so a single registration on the root command covers every
+// generated endpoint subcommand without touching their generated files.
+func installTrailingNewline(rootCmd *cobra.Command, flags *rootFlags) {
+	rootCmd.PersistentPostRunE = func(cmd *cobra.Command, args []string) error {
+		if !isTerminal(os.Stdout) {
+			return nil
+		}
+		if flags.asJSON || flags.csv || flags.quiet || flags.plain || flags.agent {
+			return nil
+		}
+		fmt.Fprintln(os.Stdout)
+		return nil
+	}
+}
+
 // installBanner wires two behaviors onto the root command:
 //   - bare `datpaq` (no subcommand) → RenderSplash
 //   - `datpaq --help` → default cobra help, prefixed with the gradient banner
