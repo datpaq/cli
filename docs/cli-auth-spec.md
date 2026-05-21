@@ -90,10 +90,10 @@ by the CLI from the localhost callback handler.
 
 ```json
 {
-  "api_key": "dp_live_...",
+  "api_key": "<api_key>",
   "user": {
-    "id": "user_2abc...",
-    "email": "jerod@datpaq.com"
+    "id": "<clerk_user_id>",
+    "email": "developer@example.com"
   },
   "expires_at": null
 }
@@ -121,21 +121,25 @@ by the CLI from the localhost callback handler.
 
 **Auth on this endpoint:** None. The one-time code IS the credential.
 
-## Open questions (please confirm before implementing)
+## Implementation notes
 
-1. **API key shape:** Is there a single primary key per user, or many named
-   keys? If many, should the CLI create/use a key named `cli`?
-2. **Key visibility on dashboard:** Should keys issued via CLI login show up
-   in the user's dashboard with a label like "Created by CLI"?
-3. **Rotation:** Do we want a `datpaq auth rotate` command later that hits an
-   endpoint to rotate the bound key? Out of scope for v1.
-4. **CORS:** Not needed — the localhost callback is a server-to-server-style
-   redirect through the browser, not an XHR.
+Design choices the website implementation should align with:
 
-## CLI implementation (already in progress)
+1. **API key returned:** the user's primary key, or one labeled `cli` when
+   the user has multiple keys. Implementation may default to either; the
+   CLI doesn't depend on the label.
+2. **Dashboard visibility:** keys returned via this flow should be
+   discoverable in the user's dashboard (recommended label: "Created by
+   CLI") so users can rotate them out-of-band.
+3. **Rotation:** out of scope for v1. A future `datpaq auth rotate`
+   command can be added once the endpoint exists.
+4. **CORS:** not required — the localhost callback is a same-browser
+   server-side redirect, not an XHR.
 
-CLI side lives in `internal/cli/auth_login.go` (this repo)
-(new file). It will:
+## CLI implementation
+
+The CLI consumer of this contract lives in `internal/cli/auth_login.go`.
+It:
 
 - Start `http.Server` on a random free port (`net.Listen("tcp", "127.0.0.1:0")`)
 - Open `https://datpaq.com/cli/auth?port={port}&state={nonce}` via the OS
