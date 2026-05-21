@@ -185,6 +185,7 @@ func RenderSplash(w io.Writer) {
 	pointers := []struct{ cmd, desc string }{
 		{"datpaq --help", "List all commands and flags"},
 		{"datpaq api", "Browse all API endpoints"},
+		{"datpaq sample", "Copy-paste code samples for an endpoint"},
 		{"datpaq doctor", "Check auth and connectivity"},
 		{"datpaq auth login", "Sign in via browser"},
 	}
