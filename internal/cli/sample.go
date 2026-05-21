@@ -31,18 +31,20 @@ var sampleLangs = []string{"curl", "js", "py", "go"}
 func newSampleCmd(flags *rootFlags) *cobra.Command {
 	var lang string
 	cmd := &cobra.Command{
-		Use:   "sample <interface> [method]",
+		Use:   "sample [interface] [method]",
 		Short: "Print copy-pasteable code samples for any endpoint",
 		Long: "Emits a ready-to-run snippet for a Datpaq API endpoint, " +
-			"using $DATPAQ_API_KEY as the credential placeholder. With just " +
-			"an interface, lists the available methods. With both interface " +
-			"and method, prints the snippet.\n\n" +
+			"using $DATPAQ_API_KEY as the credential placeholder.\n\n" +
+			"  No args              → list all interfaces (same as 'datpaq api')\n" +
+			"  One arg (interface)  → list its methods, or render directly if there's only one\n" +
+			"  Two args             → render the snippet\n\n" +
 			"Companion to 'datpaq api' (which browses the same endpoints).",
-		Example: "  datpaq sample aircraft\n" +
+		Example: "  datpaq sample\n" +
+			"  datpaq sample aircraft\n" +
 			"  datpaq sample aircraft lookup-by-tail\n" +
 			"  datpaq sample aircraft lookup-by-tail --lang py\n" +
 			"  datpaq sample ip-geolocation get --lang go",
-		Args: cobra.RangeArgs(1, 2),
+		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !contains(sampleLangs, lang) {
 				return usageErr(fmt.Errorf("unsupported --lang %q (supported: %s)",
@@ -52,6 +54,16 @@ func newSampleCmd(flags *rootFlags) *cobra.Command {
 			// Walk from the root, not from `cmd` — `cmd` is `sample` itself
 			// and only its own children would be visible from there.
 			endpoints := collectEndpoints(cmd.Root())
+
+			// No-args path: list every interface so the user can pick one. The
+			// splash advertises 'datpaq sample' as a top-level entry point, so
+			// running it cold needs to lead somewhere, not just print a cobra
+			// usage error.
+			if len(args) == 0 {
+				listInterfaces(cmd.OutOrStdout(), endpoints)
+				return nil
+			}
+
 			iface := args[0]
 			matches := endpointsForInterface(endpoints, iface)
 			if len(matches) == 0 {
@@ -170,6 +182,39 @@ func endpointsForInterface(all []endpointInfo, iface string) []endpointInfo {
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].method < out[j].method })
 	return out
+}
+
+// listInterfaces prints every interface that has at least one sampleable
+// endpoint, deduped and sorted. Format intentionally mirrors `datpaq api`
+// so the two commands feel like siblings.
+func listInterfaces(w io.Writer, all []endpointInfo) {
+	seen := map[string]int{}
+	for _, ep := range all {
+		seen[ep.iface]++
+	}
+	names := make([]string, 0, len(seen))
+	for name := range seen {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	fmt.Fprintf(w, "Available interfaces (%d):\n\n", len(names))
+	maxName := 0
+	for _, n := range names {
+		if len(n) > maxName {
+			maxName = len(n)
+		}
+	}
+	for _, n := range names {
+		fmt.Fprintf(w, "  %-*s  %d method", maxName, n, seen[n])
+		if seen[n] != 1 {
+			fmt.Fprint(w, "s")
+		}
+		fmt.Fprintln(w)
+	}
+	fmt.Fprintln(w, "\nNext:")
+	fmt.Fprintln(w, "  datpaq sample <interface>           # list methods on that interface")
+	fmt.Fprintln(w, "  datpaq sample <interface> <method>  # render a snippet")
 }
 
 func listMethods(w io.Writer, iface string, eps []endpointInfo) {
