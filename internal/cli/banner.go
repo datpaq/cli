@@ -166,9 +166,40 @@ func dim(s string) string {
 	return "\033[38;2;100;116;139m" + s + "\033[0m"
 }
 
-// installBanner wires the gradient banner into the root command's help so it
-// renders on `datpaq` (no args) and `datpaq --help`. Subcommand help is
-// untouched to keep `datpaq <cmd> --help` clean for scripting.
+// RenderSplash writes a compact landing screen for bare `datpaq` invocations:
+// banner + welcome paragraphs + a four-line pointer menu. The intent is "tell
+// me what to do next in one screenful" — the exhaustive command/flag dump
+// stays parked behind `datpaq --help`.
+//
+// Kept paragraphs are owned by the user (see commit history); changing them
+// requires explicit intent, not a passing edit.
+func RenderSplash(w io.Writer) {
+	RenderBanner(w)
+	fmt.Fprintln(w, "Manage datpaq resources via the datpaq API.")
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "Add --agent to any command for JSON output + non-interactive mode.")
+	fmt.Fprintln(w)
+	// Two-column layout: command in default color, description dimmed. Widths
+	// are hand-tuned for the four entries below; if more get added, switch to
+	// text/tabwriter so alignment stays consistent.
+	pointers := []struct{ cmd, desc string }{
+		{"datpaq --help", "List all commands and flags"},
+		{"datpaq doctor", "Check auth and connectivity"},
+		{"datpaq api", "Browse all API endpoints"},
+		{"datpaq auth login", "Sign in via browser"},
+	}
+	for _, p := range pointers {
+		fmt.Fprintf(w, "  %-22s%s\n", p.cmd, dim(p.desc))
+	}
+	fmt.Fprintln(w)
+}
+
+// installBanner wires two behaviors onto the root command:
+//   - bare `datpaq` (no subcommand) → RenderSplash
+//   - `datpaq --help` → default cobra help, prefixed with the gradient banner
+//
+// Subcommand help (`datpaq <cmd> --help`) is untouched, so scripted callers
+// piping --help output don't get banner noise.
 func installBanner(rootCmd *cobra.Command) {
 	defaultHelp := rootCmd.HelpFunc()
 	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
@@ -177,4 +208,12 @@ func installBanner(rootCmd *cobra.Command) {
 		}
 		defaultHelp(cmd, args)
 	})
+	// Cobra only auto-invokes Help() on a bare parent command when RunE is
+	// nil. Assigning RunE here intercepts that path so the splash shows
+	// instead of the full help dump. Subcommands have their own RunE and are
+	// dispatched before this ever runs.
+	rootCmd.RunE = func(cmd *cobra.Command, args []string) error {
+		RenderSplash(cmd.OutOrStdout())
+		return nil
+	}
 }
