@@ -279,6 +279,7 @@ Run 'datpaq doctor' to verify auth and connectivity.`,
 	rootCmd.AddCommand(newWebScreenshotPromotedCmd(flags))
 	rootCmd.AddCommand(newWhoisPromotedCmd(flags))
 	rootCmd.AddCommand(newVersionCliCmd())
+	rootCmd.AddCommand(newSampleCmd(flags)) // hand-authored; see sample.go
 
 	installBanner(rootCmd) // hand-authored; see banner.go
 
