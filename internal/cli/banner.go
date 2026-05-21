@@ -184,8 +184,8 @@ func RenderSplash(w io.Writer) {
 	// text/tabwriter so alignment stays consistent.
 	pointers := []struct{ cmd, desc string }{
 		{"datpaq --help", "List all commands and flags"},
-		{"datpaq doctor", "Check auth and connectivity"},
 		{"datpaq api", "Browse all API endpoints"},
+		{"datpaq doctor", "Check auth and connectivity"},
 		{"datpaq auth login", "Sign in via browser"},
 	}
 	for _, p := range pointers {
