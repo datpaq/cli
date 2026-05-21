@@ -1,7 +1,7 @@
 ---
 name: pp-datpaq
 description: "Printing Press CLI for Datpaq. Comprehensive multi-service API platform providing aviation, geolocation, financial, utilities, image processing,..."
-author: "forgetfoo"
+author: "datpaq"
 license: "Apache-2.0"
 argument-hint: "<command> [args] | install cli|mcp"
 allowed-tools: "Read Bash"

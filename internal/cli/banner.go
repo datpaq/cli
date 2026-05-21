@@ -1,4 +1,4 @@
-// Copyright 2026 forgetfoo. Licensed under Apache-2.0. See LICENSE.
+// Copyright 2026 datpaq. Licensed under Apache-2.0. See LICENSE.
 // Hand-authored: terminal port of the website's console-banner.tsx. Same
 // glyphs, same 6-stop gradient, same 12-segment-per-line interpolation.
 // Source of truth: console-banner.tsx in the datpaq website repo

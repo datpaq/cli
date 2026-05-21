@@ -42,9 +42,9 @@ checksum:
 brews:
   - name: datpaq
     repository:
-      owner: forgetfoo
+      owner: datpaq
       name: homebrew-tap
-    homepage: "https://github.com/forgetfoo/datpaq"
+    homepage: "https://github.com/datpaq/cli"
     description: "Comprehensive multi-service API platform providing aviation, geolocation, financial, utilities, image processing,..."
     install: |
       bin.install "datpaq"
