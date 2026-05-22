@@ -1,6 +1,11 @@
 # Build artifacts
 /bin/
 /build/
+
+# vhs per-frame PNG output (docs/cli-terminal.png is the dir name vhs
+# uses when 'Output ….png' is set in the tape — 1500+ frames). The
+# animated .webp / .gif are what we actually ship.
+/docs/cli-terminal.png/
 *.exe
 *.test
 *.prof
