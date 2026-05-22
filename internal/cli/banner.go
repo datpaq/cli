@@ -175,16 +175,17 @@ func dim(s string) string {
 // requires explicit intent, not a passing edit.
 func RenderSplash(w io.Writer) {
 	RenderBanner(w)
-	fmt.Fprintln(w, "Manage datpaq resources via the datpaq API.")
+	fmt.Fprintln(w, "Manage datpaq resources via the datpaq API. Rate limits apply.")
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "Add --agent to any command for JSON output + non-interactive mode.")
 	fmt.Fprintln(w)
 	// Two-column layout: command in default color, description dimmed. Widths
-	// are hand-tuned for the four entries below; if more get added, switch to
-	// text/tabwriter so alignment stays consistent.
+	// are hand-tuned for the entries below; if longer commands get added,
+	// switch to text/tabwriter so alignment stays consistent.
 	pointers := []struct{ cmd, desc string }{
 		{"datpaq --help", "List all commands and flags"},
 		{"datpaq api", "Browse all API endpoints"},
+		{"datpaq exec", "Run an endpoint (prompts for required params)"},
 		{"datpaq sample", "Copy-paste code samples for an endpoint"},
 		{"datpaq doctor", "Check auth and connectivity"},
 		{"datpaq auth login", "Sign in via browser"},

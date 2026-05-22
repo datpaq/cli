@@ -167,6 +167,7 @@ Run 'api <interface>' to see that interface's methods.`,
 				fmt.Fprintf(cmd.OutOrStdout(), "  %-45s %s\n", e.Name, e.Short)
 			}
 			fmt.Fprintln(cmd.OutOrStdout(), "\nUse 'datpaq api <interface>' to see methods.")
+			fmt.Fprintln(cmd.OutOrStdout(), "Use 'datpaq exec list' to see endpoints callable via 'datpaq exec'.")
 			return nil
 		},
 	}
