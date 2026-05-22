@@ -44,8 +44,10 @@ type exchangeResponse struct {
 
 func newAuthLoginCmd(flags *rootFlags) *cobra.Command {
 	var (
-		noBrowser bool
-		timeout   time.Duration
+		noBrowser   bool
+		timeout     time.Duration
+		authURL     string
+		exchangeURL string
 	)
 	cmd := &cobra.Command{
 		Use:   "login",
@@ -67,6 +69,18 @@ func newAuthLoginCmd(flags *rootFlags) *cobra.Command {
 			cfg, err := config.Load(flags.configPath)
 			if err != nil {
 				return configErr(err)
+			}
+
+			// Resolve effective URLs: flag overrides win, otherwise use the
+			// production defaults. The flags are primarily for local dev
+			// against a localhost website / staging environments.
+			effectiveAuthURL := authURL
+			if effectiveAuthURL == "" {
+				effectiveAuthURL = authLoginAuthURL
+			}
+			effectiveExchangeURL := exchangeURL
+			if effectiveExchangeURL == "" {
+				effectiveExchangeURL = authLoginExchangeURL
 			}
 
 			state, err := randomNonce(32)
@@ -96,15 +110,15 @@ func newAuthLoginCmd(flags *rootFlags) *cobra.Command {
 				_ = srv.Shutdown(shutdownCtx)
 			}()
 
-			authURL := buildAuthURL(port, state)
+			browserURL := buildAuthURL(effectiveAuthURL, port, state)
 			w := cmd.OutOrStdout()
 			fmt.Fprintln(w, "Opening browser to sign in…")
-			fmt.Fprintln(w, "  ", authURL)
+			fmt.Fprintln(w, "  ", browserURL)
 			fmt.Fprintln(w, "")
 			fmt.Fprintln(w, "Waiting for callback. Press Ctrl+C to cancel.")
 
 			if !noBrowser {
-				if err := openSetupURL(authURL); err != nil {
+				if err := openSetupURL(browserURL); err != nil {
 					fmt.Fprintf(cmd.ErrOrStderr(),
 						"could not open browser automatically (%v); open the URL above manually.\n", err)
 				}
@@ -120,7 +134,7 @@ func newAuthLoginCmd(flags *rootFlags) *cobra.Command {
 				if res.err != nil {
 					return res.err
 				}
-				exch, err := exchangeCode(cmd.Context(), res.code, state)
+				exch, err := exchangeCode(cmd.Context(), effectiveExchangeURL, res.code, state)
 				if err != nil {
 					return fmt.Errorf("exchanging code for API key: %w", err)
 				}
@@ -152,6 +166,10 @@ func newAuthLoginCmd(flags *rootFlags) *cobra.Command {
 		"Print the auth URL but do not auto-open the browser")
 	cmd.Flags().DurationVar(&timeout, "timeout", authLoginDefaultWait,
 		"How long to wait for the browser callback")
+	cmd.Flags().StringVar(&authURL, "auth-url", "",
+		"Override the browser sign-in URL (advanced; for local dev against a non-production website)")
+	cmd.Flags().StringVar(&exchangeURL, "exchange-url", "",
+		"Override the code-exchange endpoint URL (advanced; for local dev against a non-production website)")
 	return cmd
 }
 
@@ -207,12 +225,13 @@ func buildCallbackMux(expectedState string, ch chan<- callbackResult) http.Handl
 	return mux
 }
 
-func buildAuthURL(port int, state string) string {
-	u, err := url.Parse(authLoginAuthURL)
+func buildAuthURL(baseURL string, port int, state string) string {
+	u, err := url.Parse(baseURL)
 	if err != nil {
-		// authLoginAuthURL is a constant; a parse error here is a bug, not a
-		// runtime condition the user can hit.
-		return fmt.Sprintf("%s?port=%d&state=%s", authLoginAuthURL, port, state)
+		// Parse failures are only reachable via a malformed --auth-url
+		// override; fall back to a string-concatenated URL so the user at
+		// least sees what the CLI tried.
+		return fmt.Sprintf("%s?port=%d&state=%s", baseURL, port, state)
 	}
 	q := u.Query()
 	q.Set("port", fmt.Sprintf("%d", port))
@@ -221,14 +240,14 @@ func buildAuthURL(port int, state string) string {
 	return u.String()
 }
 
-func exchangeCode(ctx context.Context, code, state string) (*exchangeResponse, error) {
+func exchangeCode(ctx context.Context, exchangeURL, code, state string) (*exchangeResponse, error) {
 	body, err := json.Marshal(map[string]string{"code": code, "state": state})
 	if err != nil {
 		return nil, err
 	}
 	reqCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
-	req, err := http.NewRequestWithContext(reqCtx, http.MethodPost, authLoginExchangeURL, bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(reqCtx, http.MethodPost, exchangeURL, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
