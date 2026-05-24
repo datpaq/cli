@@ -49,7 +49,7 @@ That's the loop: discover → call → integrate.
 - **`datpaq sample`** — emit ready-to-paste snippets in `curl`, `JavaScript`, `Python`, or `Go`. Uses `$DATPAQ_API_KEY` as the credential placeholder so snippets are safe to share.
 - **Browser-based SSO** via `datpaq auth login` — no copy-pasting tokens from the dashboard.
 - **Agent-friendly mode** — append `--agent` to any command for JSON output, non-interactive defaults, and stable exit codes. Drop it into a Claude Code workflow or a CI job.
-- **Bundled MCP server** (`datpaq-mcp`) — every command auto-mirrored as an MCP tool for Claude Desktop and other MCP clients.
+- **Bundled MCP server** (`datpaq-mcp`) — every command auto-mirrored as an MCP tool for Claude Desktop and other MCP clients. For a remote/hosted MCP server, see [`github.com/datpaq/mcp`](https://github.com/datpaq/mcp).
 - **Generated, not hand-stitched** — built with [`cli-printing-press`](https://github.com/mvanhorn/cli-printing-press) from the live OpenAPI spec. New endpoints land in the CLI when the spec updates.
 
 ## Authentication
@@ -100,6 +100,12 @@ $ datpaq sample ip-intelligence get --lang py
 ```bash
 $ datpaq dns example.com --agent | jq '.records'
 ```
+
+## Managing active APIs
+
+The CLI's discovery surface (`datpaq api`, `datpaq sample`, splash) only shows endpoints listed in [`internal/cli/active-apis.json`](internal/cli/active-apis.json). When a new API ships on [datpaq.com](https://datpaq.com), add its slug there and rebuild.
+
+The same file lives in [`github.com/datpaq/mcp`](https://github.com/datpaq/mcp/blob/main/internal/cli/active-apis.json) for the hosted MCP server — keep both in sync.
 
 ## Documentation
 
