@@ -105,7 +105,11 @@ $ datpaq dns example.com --agent | jq '.records'
 
 The CLI's discovery surface (`datpaq api`, `datpaq sample`, splash) only shows endpoints listed in [`internal/cli/active-apis.json`](internal/cli/active-apis.json). When a new API ships on [datpaq.com](https://datpaq.com), add its slug there and rebuild.
 
-The same file lives in [`github.com/datpaq/mcp`](https://github.com/datpaq/mcp/blob/main/internal/cli/active-apis.json) for the hosted MCP server — keep both in sync.
+The same file lives in [`github.com/datpaq/mcp`](https://github.com/datpaq/mcp/blob/main/internal/cli/active-apis.json) for the hosted MCP server — keep both in sync. If the MCP repo is checked out as a sibling directory, mirror the file with:
+
+```bash
+./scripts/sync-active-apis.sh
+```
 
 ## Documentation
 
