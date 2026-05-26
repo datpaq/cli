@@ -23,7 +23,7 @@
 go install github.com/datpaq/cli/cmd/datpaq@latest
 ```
 
-Requires Go 1.22+. Once installed, `datpaq` is on your `PATH` (assuming `$HOME/go/bin` is exported).
+Requires Go 1.26.3+. Once installed, `datpaq` is on your `PATH` (assuming `$HOME/go/bin` is exported).
 
 Homebrew install coming soon:
 
@@ -105,7 +105,7 @@ $ datpaq dns example.com --agent | jq '.records'
 
 The CLI's discovery surface (`datpaq api`, `datpaq sample`, splash) only shows endpoints listed in [`internal/cli/active-apis.json`](internal/cli/active-apis.json). When a new API ships on [datpaq.com](https://datpaq.com), add its slug there and rebuild.
 
-The same file lives in [`github.com/datpaq/mcp`](https://github.com/datpaq/mcp/blob/main/internal/cli/active-apis.json) for the hosted MCP server — keep both in sync. If the MCP repo is checked out as a sibling directory, mirror the file with:
+The same file powers the hosted MCP server at [mcp.datpaq.com](https://mcp.datpaq.com/) and lives at [`github.com/datpaq/mcp`](https://github.com/datpaq/mcp/blob/main/internal/cli/active-apis.json) — keep both in sync. If the MCP repo is checked out as a sibling directory, mirror the file with:
 
 ```bash
 ./scripts/sync-active-apis.sh
