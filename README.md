@@ -11,7 +11,7 @@
 [![Latest Release](https://img.shields.io/github/v/release/datpaq/cli?color=6b21a8)](https://github.com/datpaq/cli/releases/latest)
 [![License](https://img.shields.io/badge/license-Apache_2.0-6b21a8.svg)](LICENSE)
 
-[Install](#install) · [Quickstart](#quickstart) · [Documentation](#documentation) · [Dashboard ↗](https://datpaq.com)
+[Install](#install) · [Updating](#updating) · [Quickstart](#quickstart) · [Documentation](#documentation) · [Dashboard ↗](https://datpaq.com)
 
 </div>
 
@@ -29,6 +29,23 @@ Homebrew install coming soon:
 
 ```bash
 brew install datpaq/tap/datpaq          # not yet available
+```
+
+## Updating
+
+**From a cloned repo** — pull and reinstall from the repo root:
+
+```bash
+git pull
+go install ./cmd/datpaq
+```
+
+Verify with `which datpaq` and `datpaq --version`. The binary lands in `$HOME/go/bin` (see [Install](#install) for `PATH` setup).
+
+**From a release** (no local clone):
+
+```bash
+go install github.com/datpaq/cli/cmd/datpaq@latest
 ```
 
 ## Quickstart
