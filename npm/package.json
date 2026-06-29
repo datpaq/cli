@@ -1,0 +1,27 @@
+{
+  "name": "datpaq",
+  "version": "1.0.0",
+  "description": "Official CLI for the Datpaq API",
+  "homepage": "https://github.com/datpaq/cli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/datpaq/cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/datpaq/cli/issues"
+  },
+  "license": "Apache-2.0",
+  "bin": {
+    "datpaq": "run.js"
+  },
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "files": [
+    "install.js",
+    "run.js"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
