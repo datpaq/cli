@@ -25,6 +25,14 @@ go install github.com/datpaq/cli/cmd/datpaq@latest
 
 Requires Go 1.26.3+. Once installed, `datpaq` is on your `PATH` (assuming `$HOME/go/bin` is exported).
 
+**Windows (Node.js / npm):**
+
+```powershell
+npm install -g datpaq
+```
+
+Requires Node.js 18+. Once installed, `datpaq` is available in your terminal. Verify with `datpaq --version`.
+
 Homebrew install coming soon:
 
 ```bash
