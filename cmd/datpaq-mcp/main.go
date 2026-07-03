@@ -14,7 +14,7 @@ import (
 func main() {
 	s := server.NewMCPServer(
 		"Datpaq Proapi",
-		"1.0.0",
+		"1.0.1",
 		server.WithToolCapabilities(false),
 	)
 
