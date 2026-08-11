@@ -27,12 +27,7 @@ type Config struct {
 	DatpaqApiKeyHeader string            `toml:"api_key_header"`
 }
 
-func Load(configPath string) (*Config, error) {
-	cfg := &Config{
-		BaseURL: "https://datpaq.com/api/v1",
-	}
-
-	// Resolve config path
+func resolveConfigPath(configPath string) string {
 	path := configPath
 	if path == "" {
 		path = os.Getenv("DATPAQ_CONFIG")
@@ -41,14 +36,35 @@ func Load(configPath string) (*Config, error) {
 		home, _ := os.UserHomeDir()
 		path = filepath.Join(home, ".config", "datpaq", "config.toml")
 	}
-	cfg.Path = path
+	return path
+}
 
-	// Try to load config file
+// LoadDisk reads config from disk only (no env overlays). A missing file
+// yields defaults (production base URL). Use this when persisting a field
+// update so env-merged credentials are never written back to disk.
+func LoadDisk(configPath string) (*Config, error) {
+	path := resolveConfigPath(configPath)
+	cfg := &Config{
+		BaseURL: "https://datpaq.com/api/v1",
+		Path:    path,
+	}
 	data, err := os.ReadFile(path)
-	if err == nil {
-		if err := toml.Unmarshal(data, cfg); err != nil {
-			return nil, fmt.Errorf("parsing config %s: %w", path, err)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return cfg, nil
 		}
+		return nil, fmt.Errorf("reading config %s: %w", path, err)
+	}
+	if err := toml.Unmarshal(data, cfg); err != nil {
+		return nil, fmt.Errorf("parsing config %s: %w", path, err)
+	}
+	return cfg, nil
+}
+
+func Load(configPath string) (*Config, error) {
+	cfg, err := LoadDisk(configPath)
+	if err != nil {
+		return nil, err
 	}
 
 	// Env var overrides. DATPAQ_API_KEY is the documented/preferred name;
@@ -152,6 +168,25 @@ func (c *Config) ClearTokens() error {
 	c.ClientSecret = ""
 	c.DatpaqApiKeyHeader = ""
 	return c.save()
+}
+
+// SaveBaseURL persists only the API base URL. It re-reads the on-disk file
+// (no env overlays) before writing so an env-merged Config — e.g. one that
+// absorbed DATPAQ_API_KEY into DatpaqApiKeyHeader — cannot overwrite the
+// file credential. Other on-disk fields are preserved as loaded from disk.
+func (c *Config) SaveBaseURL(baseURL string) error {
+	path := c.Path
+	if path == "" {
+		path = resolveConfigPath("")
+	}
+	disk, err := LoadDisk(path)
+	if err != nil {
+		return err
+	}
+	disk.BaseURL = strings.TrimRight(baseURL, "/")
+	c.BaseURL = disk.BaseURL
+	c.Path = disk.Path
+	return disk.save()
 }
 
 func (c *Config) save() error {

@@ -60,6 +60,16 @@ func RootCmd() *cobra.Command {
 
 // Execute runs the CLI in non-interactive mode: never prompts, all values via flags or stdin.
 func Execute() error {
+	// Private env toggle — handled before Cobra so it never appears in --help,
+	// agent-context, completions, or MCP. Do not document. See gummie.go.
+	if handled, err := tryGummie(os.Args, os.Stdout); handled {
+		if err != nil {
+			// Cobra would normally print this; we short-circuit before Execute.
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		}
+		return err
+	}
+
 	var flags rootFlags
 	rootCmd := newRootCmd(&flags)
 

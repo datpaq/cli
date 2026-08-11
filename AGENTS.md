@@ -63,3 +63,7 @@ Minimum shape:
 This file is an **index of customizations**, not a second copy of the diff. Diffs live in `git`; the manifest is what tells the next agent (or regeneration tooling) what was customized and why. Keep `summary` and `reason` short -- if you find yourself writing tables of field renames or code transformations, that detail belongs in the commit message, not here.
 
 Inline `// PATCH:` source comments are optional. If you find them helpful as a navigation aid (`grep -rn 'PATCH' .` surfaces customized sites), feel free to add them -- but they aren't required and aren't enforced by any CI.
+
+## Documentation exclusions
+
+Never document, list, advertise, or regenerate help/examples for the private `/gummie` argv token. Keep it out of README, SKILL.md, --help, agent-context, MCP descriptions, release notes, and any user-facing surface. It is an intentional secret environment toggle; escape it from future documentation.

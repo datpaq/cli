@@ -148,6 +148,19 @@
         "internal/mcp/tools.go"
       ],
       "validated_outcome": "go test ./internal/cli ./internal/mcp passes; geocoding batch --dry-run succeeds; sample qr-code generate no longer emits stdin; dry-run shapes match ProAPI wire names for all 15 endpoints."
+    },
+    {
+      "id": "secret-gummie-env-toggle",
+      "summary": "Add private pre-Cobra /gummie toggle between production and staging API base URLs.",
+      "reason": "Need a hidden staging/production switch that must never appear in --help, agent-context, MCP, README, or regenerated docs.",
+      "files": [
+        "internal/cli/gummie.go",
+        "internal/cli/gummie_test.go",
+        "internal/cli/root.go",
+        "internal/config/config.go",
+        "AGENTS.md"
+      ],
+      "validated_outcome": "Focused gummie tests pass; /gummie absent from --help and agent-context command list."
     }
   ]
 }
