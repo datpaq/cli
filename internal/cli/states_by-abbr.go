@@ -31,7 +31,7 @@ func newStatesByAbbrCmd(flags *rootFlags) *cobra.Command {
 			path := "/us-states/{abbr}"
 			path = replacePathParam(path, "abbr", args[0])
 			params := map[string]string{}
-			data, prov, err := resolveRead(cmd.Context(), c, flags, "states", false, path, params, nil)
+			data, prov, err := resolveRead(cmd.Context(), c, flags, "us-states", false, path, params, nil)
 			if err != nil {
 				return classifyAPIError(err, flags)
 			}

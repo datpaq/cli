@@ -30,7 +30,7 @@ func newStatesByFipsCmd(flags *rootFlags) *cobra.Command {
 			path := "/us-states/fips/{fipscode}"
 			path = replacePathParam(path, "fipscode", args[0])
 			params := map[string]string{}
-			data, prov, err := resolveRead(cmd.Context(), c, flags, "states", false, path, params, nil)
+			data, prov, err := resolveRead(cmd.Context(), c, flags, "us-states", false, path, params, nil)
 			if err != nil {
 				return classifyAPIError(err, flags)
 			}

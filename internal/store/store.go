@@ -1907,7 +1907,7 @@ func (s *Store) UpsertStates(data json.RawMessage) error {
 	}
 	defer tx.Rollback()
 
-	if err := s.upsertGenericResourceTx(tx, "states", id, data); err != nil {
+	if err := s.upsertGenericResourceTx(tx, "us-states", id, data); err != nil {
 		return err
 	}
 	if err := s.upsertStatesTx(tx, id, obj, data); err != nil {

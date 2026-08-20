@@ -30,7 +30,7 @@ func newStatesListCmd(flags *rootFlags) *cobra.Command {
 			if flagQ != "" {
 				params["q"] = fmt.Sprintf("%v", flagQ)
 			}
-			data, prov, err := resolveRead(cmd.Context(), c, flags, "states", false, path, params, nil)
+			data, prov, err := resolveRead(cmd.Context(), c, flags, "us-states", false, path, params, nil)
 			if err != nil {
 				return classifyAPIError(err, flags)
 			}

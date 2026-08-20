@@ -203,6 +203,20 @@
         "internal/store/store.go"
       ],
       "validated_outcome": "datpaq api --agent lists us-states; datpaq states list alias still works; gateway path tests pass."
+    },
+    {
+      "id": "us-states-resource-and-docs",
+      "summary": "Finish states\u2192us-states sync for docs and local cache resource type.",
+      "reason": "Command/MCP already used us-states; SKILL.md and resolveRead/store generic resource_type still said states.",
+      "files": [
+        "SKILL.md",
+        "internal/cli/states_list.go",
+        "internal/cli/states_by-abbr.go",
+        "internal/cli/states_by-fips.go",
+        "internal/store/store.go",
+        "internal/store/upsert_batch_test.go"
+      ],
+      "validated_outcome": "go test ./internal/cli ./internal/store ./internal/mcp passes; SKILL.md documents us-states."
     }
   ]
 }

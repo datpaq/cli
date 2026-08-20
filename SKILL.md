@@ -175,11 +175,11 @@ Comprehensive multi-service API platform providing aviation, geolocation, financ
 - `datpaq spell-check languages` — List supported languages for spell checking
 - `datpaq spell-check spell-check` — Detects spelling errors with ranked correction suggestions. Supports English, Spanish, French, German, and Italian....
 
-**states** — U.S. state metadata by abbreviation or FIPS code
+**us-states** — U.S. state metadata by abbreviation or FIPS code
 
-- `datpaq states by-abbr` — Get U.S. state by 2-letter abbreviation
-- `datpaq states by-fips` — Get U.S. state by FIPS code
-- `datpaq states list` — List or search U.S. states
+- `datpaq us-states by-abbr` — Get U.S. state by 2-letter abbreviation
+- `datpaq us-states by-fips` — Get U.S. state by FIPS code
+- `datpaq us-states list` — List or search U.S. states
 
 **text-language** — Text language detection supporting 176+ languages
 
