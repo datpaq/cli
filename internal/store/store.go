@@ -2364,7 +2364,7 @@ func (s *Store) UpsertBatch(resourceType string, items []json.RawMessage) (int, 
 			typedErr = s.upsertSecureRelayTx(tx, id, obj, item)
 		case "spell-check":
 			typedErr = s.upsertSpellCheckTx(tx, id, obj, item)
-		case "states":
+		case "states", "us-states":
 			typedErr = s.upsertStatesTx(tx, id, obj, item)
 		case "text-language":
 			typedErr = s.upsertTextLanguageTx(tx, id, obj, item)

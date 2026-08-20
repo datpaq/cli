@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "applied_at": "2026-08-05",
+  "applied_at": "2026-08-20",
   "base_run_id": "20260521-153730",
   "base_printing_press_version": "4.10.0",
   "patches": [
@@ -161,6 +161,48 @@
         "AGENTS.md"
       ],
       "validated_outcome": "Focused gummie tests pass; /gummie absent from --help and agent-context command list."
+    },
+    {
+      "id": "sync-active-catalog-35-openapi",
+      "summary": "Sync CLI OpenAPI/active-apis to website's 35 APIs; fix gateway paths for define, states, and sample-data shortcuts.",
+      "reason": "Website API_ACTIVE_SLUGS and openapi.yaml list 35 live APIs. The CLI still advertised 41 and its spec.yaml omitted several active services while retaining deactivated ones in discovery.",
+      "files": [
+        "internal/cli/active-apis.json",
+        "internal/cli/active_apis_test.go",
+        "internal/cli/gateway_path_test.go",
+        "internal/cli/promoted_define.go",
+        "internal/cli/promoted_generate-batch.go",
+        "internal/cli/promoted_generate.go",
+        "internal/cli/promoted_schemas.go",
+        "internal/cli/states_by-abbr.go",
+        "internal/cli/states_by-fips.go",
+        "internal/cli/states_list.go",
+        "internal/cli/sync.go",
+        "internal/mcp/tools.go",
+        "spec.yaml"
+      ],
+      "validated_outcome": "Path-route tests cover /dictionary, /us-states, /sample-data/{generate,generate-batch,schemas}; go test ./internal/cli ./internal/mcp passes; datpaq api --agent lists 35."
+    },
+    {
+      "id": "rename-states-command-to-us-states",
+      "summary": "Rename CLI/MCP interface from states to us-states to match ProAPI /api/v1/us-states.",
+      "reason": "The service slug and gateway path are us-states; discovery and command names should match. Legacy `states` remains a cobra alias.",
+      "files": [
+        "internal/cli/states.go",
+        "internal/cli/states_list.go",
+        "internal/cli/states_by-abbr.go",
+        "internal/cli/states_by-fips.go",
+        "internal/cli/active-apis.json",
+        "internal/cli/active_apis_test.go",
+        "internal/cli/which.go",
+        "internal/cli/tail.go",
+        "internal/cli/sync.go",
+        "internal/cli/channel_workflow.go",
+        "internal/cli/gateway_path_test.go",
+        "internal/mcp/tools.go",
+        "internal/store/store.go"
+      ],
+      "validated_outcome": "datpaq api --agent lists us-states; datpaq states list alias still works; gateway path tests pass."
     }
   ]
 }
