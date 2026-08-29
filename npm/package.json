@@ -15,7 +15,7 @@
     "datpaq": "run.js"
   },
   "scripts": {
-    "prepublishOnly": "cp ../README.md ./README.md",
+    "prepublishOnly": "node -e \"require('fs').copyFileSync('../README.md', './README.md')\"",
     "postinstall": "node install.js"
   },
   "files": [
