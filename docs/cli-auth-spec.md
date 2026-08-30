@@ -13,24 +13,19 @@ the browser to be redirected back to localhost with a short-lived authorization
 code. The CLI then exchanges the code for the user's API key.
 
 ```
-┌────────┐  1. open browser   ┌──────────────┐
-│  CLI   │ ─────────────────▶ │ datpaq.com   │
-│ :PORT  │                    │  /cli/auth   │ ── Clerk SSO ──┐
-└────────┘                    └──────┬───────┘                │
-    ▲                                │ 2. issue code          │
-    │ 3. 302 to localhost            │                        │
-    │    /callback?code=...&state=...│                        │
-    └────────────────────────────────┘                        │
-                                                              │
-    2. POST /api/internal/cli/auth/select (Clerk session)     │
-       → {code}; browser redirects code + state to localhost │
-    3. POST /api/internal/cli/auth/exchange {code, state}     │
-       ──────────────────────────────────────────────────────▶│
-    4. ← {api_key, user: {email, id}}                         │
-                                                              ▼
-                                                         persist key
-                                                       to ~/.config/
-                                                       datpaq/config.toml
+┌────────┐  1. open browser   ┌─────────────────────────────┐
+│  CLI   │ ─────────────────▶ │ datpaq.com/cli/auth         │
+│ :PORT  │                    │ Clerk SSO + key selection   │
+└────────┘                    └──────────────┬──────────────┘
+    ▲                                       │
+    │ 3. redirect to localhost              │ 2. POST /api/internal/
+    │    /callback?code=...&state=...        │    cli/auth/select
+    └───────────────────────────────────────┘    (Clerk session)
+    │
+    │ 4. POST /api/internal/cli/auth/exchange {code, state}
+    │ 5. ← {api_key, user: {email, id}}
+    ▼
+ persist key to ~/.config/datpaq/config.toml
 ```
 
 ## Endpoint 1 — `GET /cli/auth`
@@ -55,20 +50,15 @@ hands a one-time code back to the CLI's localhost listener.
 3. POST the selection, `port`, and `state` to
    `/api/internal/cli/auth/select`. The select route generates a one-time
    **authorization code** (≥128 bits of entropy, base64url) and stores it
-   server-side keyed by `code` with:
-   - `user_id` (Clerk user id)
+   in Redis keyed by `code` with a 60-second TTL. The payload contains:
+   - `datpaq_id`
+   - `token_id` (the selected or newly created API key)
    - `state` (the value from the query string — must match on exchange)
-   - `expires_at` (now + 60 seconds)
-   - `consumed` (bool, default false)
+   - `issued_at`
 4. Redirect the browser to:
    ```
    http://localhost:{port}/callback?code={code}&state={state}
    ```
-5. Render a small fallback HTML page with the same callback link, in case the
-   browser blocks the redirect or the user's local listener isn't reachable.
-   Suggested copy:
-   > **You're signed in.** The CLI should pick up automatically. If nothing
-   > happens, you can close this window.
 
 **Security notes:**
 
@@ -147,13 +137,13 @@ by the CLI from the localhost callback handler.
 
 **Server-side logic:**
 
-1. Look up `code` in the store.
-2. Reject if not found, if `consumed` is true, or if `expires_at` is in the
-   past.
-3. Reject if `state` doesn't match the value stored at issue time.
-4. Mark `consumed = true` atomically before returning the key (prevents replay
-   if the response is observed in transit).
-5. Return the user's API key.
+1. Atomically fetch and delete `code` from Redis (`GETDEL`).
+2. Reject if it was not found or its 60-second TTL has elapsed.
+3. Reject if `state` doesn't match the stored value.
+4. Resolve the selected active key for the stored Datpaq user and return it.
+
+Deleting on read makes every code single-use, including failed state-mismatch
+attempts, and prevents replay if a response is observed in transit.
 
 **Auth on this endpoint:** None. The endpoint must remain publicly reachable by
 the CLI; the short-lived, single-use code plus matching state value is the
