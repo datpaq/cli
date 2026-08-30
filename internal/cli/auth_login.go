@@ -27,7 +27,7 @@ import (
 // reaching into the cobra command builder.
 var (
 	authLoginAuthURL      = "https://datpaq.com/cli/auth"
-	authLoginExchangeURL  = "https://datpaq.com/api/v1/cli/auth/exchange"
+	authLoginExchangeURL  = "https://datpaq.com/api/internal/cli/auth/exchange"
 	authLoginDefaultWait  = 5 * time.Minute
 	authLoginCallbackPath = "/callback"
 )

@@ -22,9 +22,11 @@ code. The CLI then exchanges the code for the user's API key.
     │    /callback?code=...&state=...│                        │
     └────────────────────────────────┘                        │
                                                               │
-    4. POST /api/v1/cli/auth/exchange {code, state}           │
+    2. POST /api/internal/cli/auth/select (Clerk session)     │
+       → {code}; browser redirects code + state to localhost │
+    3. POST /api/internal/cli/auth/exchange {code, state}     │
        ──────────────────────────────────────────────────────▶│
-    5. ← {api_key, user: {email, id}}                         │
+    4. ← {api_key, user: {email, id}}                         │
                                                               ▼
                                                          persist key
                                                        to ~/.config/
@@ -48,17 +50,21 @@ hands a one-time code back to the CLI's localhost listener.
 1. If the user is not signed in to Clerk, redirect through the standard Clerk
    sign-in flow (google, github, email/password). Use the current page URL
    (including `port` and `state`) as the post-sign-in redirect target.
-2. Once authenticated, generate a one-time **authorization code** (≥128 bits of
-   entropy, base64url). Store server-side keyed by `code` with:
+2. Once authenticated, show the user's active API keys and allow the user to
+   select one or create a CLI key.
+3. POST the selection, `port`, and `state` to
+   `/api/internal/cli/auth/select`. The select route generates a one-time
+   **authorization code** (≥128 bits of entropy, base64url) and stores it
+   server-side keyed by `code` with:
    - `user_id` (Clerk user id)
    - `state` (the value from the query string — must match on exchange)
    - `expires_at` (now + 60 seconds)
    - `consumed` (bool, default false)
-3. Issue an HTTP 302 redirect to:
+4. Redirect the browser to:
    ```
    http://localhost:{port}/callback?code={code}&state={state}
    ```
-4. Render a small fallback HTML page with the same callback link, in case the
+5. Render a small fallback HTML page with the same callback link, in case the
    browser blocks the redirect or the user's local listener isn't reachable.
    Suggested copy:
    > **You're signed in.** The CLI should pick up automatically. If nothing
@@ -72,7 +78,37 @@ hands a one-time code back to the CLI's localhost listener.
 - Reject `port` values outside the unprivileged range to prevent the page from
   being used as a generic redirector.
 
-## Endpoint 2 — `POST /api/v1/cli/auth/exchange`
+## Endpoint 2 — `POST /api/internal/cli/auth/select`
+
+**Purpose:** Record the signed-in user's API-key selection and issue the
+short-lived authorization code returned to the CLI through localhost.
+
+**Auth on this endpoint:** Required. The request must use the logged-in Clerk
+session established by `/cli/auth`.
+
+**Request:** `Content-Type: application/json`
+
+```json
+{
+  "port": 54321,
+  "state": "n1G2k...opaque-nonce",
+  "tokenId": "existing-token-id-or-null"
+}
+```
+
+- `tokenId`: An active API key owned by the signed-in user, or `null` to create
+  a new CLI key when the account is below its active-key limit.
+
+**Response (200):**
+
+```json
+{ "code": "OBjFf...base64url" }
+```
+
+The browser then redirects to
+`http://localhost:{port}/callback?code={code}&state={state}`.
+
+## Endpoint 3 — `POST /api/internal/cli/auth/exchange`
 
 **Purpose:** Exchange a one-time code for the user's persistent API key. Called
 by the CLI from the localhost callback handler.
@@ -99,8 +135,8 @@ by the CLI from the localhost callback handler.
 }
 ```
 
-- `api_key`: The user's primary API key. If the user has multiple keys, return
-  the most recently used one (or create a key named "CLI" on first login).
+- `api_key`: The active API key chosen through the select endpoint, or the new
+  CLI key created there.
 - `expires_at`: ISO 8601 timestamp, or `null` if the key does not expire.
 
 **Response (400)** — code expired, already consumed, or state mismatch:
@@ -119,7 +155,13 @@ by the CLI from the localhost callback handler.
    if the response is observed in transit).
 5. Return the user's API key.
 
-**Auth on this endpoint:** None. The one-time code IS the credential.
+**Auth on this endpoint:** None. The endpoint must remain publicly reachable by
+the CLI; the short-lived, single-use code plus matching state value is the
+credential.
+
+Both API handlers belong to Mainsite's `/api/internal/cli/auth` namespace. They
+must not be placed under `/api/v1`, which is reserved by Nginx for ProAPI
+gateway traffic and requires an API key before Mainsite can receive a request.
 
 ## Implementation notes
 
@@ -145,7 +187,7 @@ It:
 - Open `https://datpaq.com/cli/auth?port={port}&state={nonce}` via the OS
   default browser
 - Wait up to 5 minutes for the `/callback` request
-- Validate state, POST to `/api/v1/cli/auth/exchange`, persist the key via
+- Validate state, POST to `/api/internal/cli/auth/exchange`, persist the key via
   `cfg.SaveCredential(api_key)`
 - Show "✓ Logged in as {email}" and return
 

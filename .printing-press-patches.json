@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "applied_at": "2026-08-20",
+  "applied_at": "2026-08-29",
   "base_run_id": "20260521-153730",
   "base_printing_press_version": "4.10.0",
   "patches": [
@@ -217,6 +217,17 @@
         "internal/store/upsert_batch_test.go"
       ],
       "validated_outcome": "go test ./internal/cli ./internal/store ./internal/mcp passes; SKILL.md documents us-states."
+    },
+    {
+      "id": "mainsite-cli-auth-namespace",
+      "summary": "Move the CLI code exchange default from the ProAPI gateway namespace to Mainsite's internal API namespace.",
+      "reason": "Nginx routes /api/v1 to ProAPI and requires an API key there, so browser login must exchange its one-time authorization code directly with Mainsite.",
+      "files": [
+        "internal/cli/auth_login.go",
+        "internal/cli/auth_login_test.go",
+        "docs/cli-auth-spec.md"
+      ],
+      "validated_outcome": "Focused auth login test asserts the production exchange URL is https://datpaq.com/api/internal/cli/auth/exchange."
     }
   ]
 }
