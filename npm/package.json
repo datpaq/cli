@@ -1,6 +1,6 @@
 {
   "name": "datpaq",
-  "version": "1.0.2",
+  "version": "1.5.1",
   "description": "Official CLI for the Datpaq API",
   "homepage": "https://github.com/datpaq/cli",
   "repository": {
@@ -15,11 +15,13 @@
     "datpaq": "run.js"
   },
   "scripts": {
+    "prepublishOnly": "node -e \"require('fs').copyFileSync('../README.md', './README.md')\"",
     "postinstall": "node install.js"
   },
   "files": [
     "install.js",
-    "run.js"
+    "run.js",
+    "README.md"
   ],
   "engines": {
     "node": ">=18"
