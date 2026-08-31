@@ -295,36 +295,136 @@ const callbackSuccessHTML = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Datpaq CLI — Signed in</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datpaq CLI | Signed in</title>
 <style>
+  :root {
+    --background: #ffffff;
+    --foreground: #0a0a0a;
+    --muted-foreground: #737373;
+    --success: #37ce7b;
+    --success-foreground: #12683b;
+    --success-background: #ebfaf2;
+    --font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-heading: "DM Sans", Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { min-height: 100%; }
+
   body {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    background: #0b0118;
-    color: #e9d5ff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
     margin: 0;
+    min-height: 100%;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
-  .card {
+
+  a { color: inherit; }
+
+  .page {
+    display: flex;
+    min-height: 100dvh;
+    flex-direction: column;
+  }
+
+  .site-header {
+    display: flex;
+    min-height: 76px;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 clamp(1.25rem, 4vw, 4rem);
+  }
+
+  .wordmark {
+    color: var(--foreground);
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: -0.08em;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  main {
+    display: grid;
+    flex: 1;
+    place-items: center;
+    padding: clamp(4rem, 9vw, 8rem) 1.5rem;
+  }
+
+  .success {
+    max-width: 42rem;
     text-align: center;
-    padding: 2.5rem 3rem;
-    border: 1px solid #6b21a8;
-    border-radius: 12px;
-    background: linear-gradient(180deg, rgba(157,78,192,0.08), rgba(107,33,168,0.02));
-    box-shadow: 0 0 60px rgba(157,78,192,0.25);
   }
-  h1 { margin: 0 0 .5rem; font-size: 1.5rem; color: #d987ea; }
-  p { margin: .25rem 0; color: #b8a3ff; }
-  .small { color: #64748b; font-size: .85rem; margin-top: 1.25rem; }
+
+  .success-icon {
+    display: inline-grid;
+    width: clamp(5.5rem, 10vw, 6.5rem);
+    height: clamp(5.5rem, 10vw, 6.5rem);
+    place-items: center;
+    border: 2px solid var(--success);
+    border-radius: 999px;
+    background: var(--success-background);
+    color: var(--success-foreground);
+    font-size: clamp(2.75rem, 6vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  h1 {
+    margin: 2rem 0 0;
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 750;
+    letter-spacing: -0.055em;
+    line-height: 1;
+  }
+
+  .lead {
+    margin: 1.25rem auto 0;
+    color: var(--muted-foreground);
+    font-size: clamp(1rem, 2vw, 1.125rem);
+    line-height: 1.7;
+  }
+
+  .site-footer {
+    flex: 0 0 auto;
+    padding: 1.5rem clamp(1.25rem, 4vw, 4rem) 2rem;
+    text-align: center;
+  }
+
+  .copyright {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+  }
+
+  @media (max-width: 700px) {
+    .site-header { min-height: 68px; }
+  }
 </style>
 </head>
 <body>
-  <div class="card">
-    <h1>✓ Signed in</h1>
-    <p>You can close this window and return to your terminal.</p>
-    <p class="small">datpaq CLI · datpaq.com</p>
+  <div class="page">
+    <header class="site-header">
+      <a class="wordmark" href="https://datpaq.com" aria-label="Datpaq home">DP.</a>
+    </header>
+
+    <main>
+      <section class="success" aria-labelledby="success-title">
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <h1 id="success-title">Signed in</h1>
+        <p class="lead">Return to your terminal. You can safely close this window.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p class="copyright">&copy; 2026 DATPAQ, Inc. All rights reserved.</p>
+    </footer>
   </div>
 </body>
 </html>

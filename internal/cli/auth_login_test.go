@@ -4,6 +4,7 @@ package cli
 
 import (
 	"net/url"
+	"strings"
 	"testing"
 )
 
@@ -22,5 +23,30 @@ func TestAuthLoginExchangeURLUsesMainsiteNamespace(t *testing.T) {
 	}
 	if got, want := u.Path, "/api/internal/cli/auth/exchange"; got != want {
 		t.Fatalf("path = %q, want %q", got, want)
+	}
+}
+
+func TestAuthLoginCallbackUsesDatpaqBrandShell(t *testing.T) {
+	t.Parallel()
+
+	required := []string{
+		`<header class="site-header">`,
+		`class="wordmark"`,
+		`justify-content: flex-start`,
+		`class="success-icon"`,
+		`<footer class="site-footer">`,
+		`&copy; 2026 DATPAQ, Inc. All rights reserved.`,
+	}
+	for _, want := range required {
+		if !strings.Contains(callbackSuccessHTML, want) {
+			t.Errorf("callbackSuccessHTML missing %q", want)
+		}
+	}
+
+	forbidden := []string{"#0b0118", "#6b21a8", "Datpaq CLI — Signed in", "footer-mark", "concentric-ring"}
+	for _, value := range forbidden {
+		if strings.Contains(callbackSuccessHTML, value) {
+			t.Errorf("callbackSuccessHTML still contains retired styling %q", value)
+		}
 	}
 }

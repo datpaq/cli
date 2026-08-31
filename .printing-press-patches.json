@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "applied_at": "2026-08-29",
+  "applied_at": "2026-08-31",
   "base_run_id": "20260521-153730",
   "base_printing_press_version": "4.10.0",
   "patches": [
@@ -228,6 +228,16 @@
         "docs/cli-auth-spec.md"
       ],
       "validated_outcome": "Focused auth login test asserts the production exchange URL is https://datpaq.com/api/internal/cli/auth/exchange."
+    },
+    {
+      "id": "datpaq-branded-auth-success-page",
+      "summary": "Restyle the localhost browser callback as a minimal Datpaq success page.",
+      "reason": "The generated purple terminal card did not match the website; CLI authentication should use Datpaq's white canvas, top-left DP. wordmark, typography, green success treatment, and simple copyright footer.",
+      "files": [
+        "internal/cli/auth_login.go",
+        "internal/cli/auth_login_test.go"
+      ],
+      "validated_outcome": "Focused auth tests assert the top-left wordmark, green success icon, copyright footer, and removal of the retired purple and animated-footer styling."
     }
   ]
 }
