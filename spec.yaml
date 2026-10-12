@@ -46,8 +46,12 @@ tags:
     description: Forward, reverse, and batch geocoding via OpenStreetMap Nominatim
   - name: Helicopter
     description: FAA rotorcraft lookup by tail, ICAO hex, serial, manufacturer, and model
+  - name: IBAN
+    description: "IBAN structure and mod-97 checksum validation with country metadata"
   - name: Image Processing
     description: Image resize, compress, convert, crop, and pipeline operations
+  - name: Income Tax
+    description: "US federal income tax estimates and brackets"
   - name: Interest Rate
     description: "Current benchmark interest rates and the Treasury yield curve"
   - name: IP Geolocation
@@ -92,6 +96,8 @@ tags:
     description: Dynamic user avatar generation in PNG, WebP, or SVG
   - name: Validate IP
     description: IP address validation and classification (IPv4, IPv6, CIDR)
+  - name: VAT Validation And Rates
+    description: "VAT number validation, VAT rates by country, and VAT price calculation"
   - name: VIN Lookup
     description: NHTSA VIN decode, makes list, and prefix suggestions
   - name: Weather
@@ -7571,6 +7577,577 @@ paths:
         - Unemployment
       operationId: unemploymentSeries
       summary: "List the unemployment series catalog"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /iban/{iban}:
+    get:
+      tags:
+        - IBAN
+      operationId: ibanLookup
+      summary: "Validate one IBAN from the URL path"
+      parameters:
+        - name: iban
+          in: path
+          required: true
+          description: "IBAN to validate"
+          schema:
+            type: string
+            example: "DE89370400440532013000"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /iban/validate:
+    post:
+      tags:
+        - IBAN
+      operationId: ibanValidate
+      summary: "Validate one IBAN"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - iban
+              properties:
+                iban:
+                  type: string
+                  description: "IBAN to validate (15-34 characters)"
+                includeMetadata:
+                  type: boolean
+                  description: "Include country/BBAN metadata (default true)"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /iban/validate-batch:
+    post:
+      tags:
+        - IBAN
+      operationId: ibanValidateBatch
+      summary: "Validate up to 100 IBANs"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ibans
+              properties:
+                ibans:
+                  type: array
+                  description: "JSON array or comma-separated IBANs (1-100)"
+                  items: {}
+                includeMetadata:
+                  type: boolean
+                  description: "Include country/BBAN metadata (default false)"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /iban/countries:
+    get:
+      tags:
+        - IBAN
+      operationId: ibanCountries
+      summary: "List supported IBAN countries"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /income-tax:
+    get:
+      tags:
+        - Income Tax
+      operationId: incomeTaxEstimate
+      summary: "Estimate federal and state income tax"
+      parameters:
+        - name: income
+          in: query
+          required: true
+          description: "Gross income"
+          schema:
+            type: number
+            example: "120000"
+        - name: filingStatus
+          in: query
+          required: false
+          description: "single (default), married_joint, or head_of_household"
+          schema:
+            type: string
+            example: "single"
+        - name: taxYear
+          in: query
+          required: false
+          description: "Tax year (default 2024)"
+          schema:
+            type: integer
+            example: "2024"
+        - name: deductions
+          in: query
+          required: false
+          description: "Deductions beyond the standard deduction"
+          schema:
+            type: number
+            example: "5000"
+        - name: taxCredits
+          in: query
+          required: false
+          description: "Federal tax credits"
+          schema:
+            type: number
+            example: "2000"
+        - name: stateRate
+          in: query
+          required: false
+          description: "State tax rate percentage (0-20)"
+          schema:
+            type: number
+            example: "5.5"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /income-tax/brackets:
+    get:
+      tags:
+        - Income Tax
+      operationId: incomeTaxBrackets
+      summary: "Get federal tax brackets"
+      parameters:
+        - name: filingStatus
+          in: query
+          required: false
+          description: "single (default), married_joint, or head_of_household"
+          schema:
+            type: string
+            example: "single"
+        - name: taxYear
+          in: query
+          required: false
+          description: "Tax year (default 2024)"
+          schema:
+            type: integer
+            example: "2024"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /income-tax/catalog:
+    get:
+      tags:
+        - Income Tax
+      operationId: incomeTaxCatalog
+      summary: "List supported years, filing statuses, and sources"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /vat-validation-and-rates/validate:
+    get:
+      tags:
+        - VAT Validation And Rates
+      operationId: vatValidationAndRatesValidate
+      summary: "Validate a VAT number"
+      parameters:
+        - name: vatNumber
+          in: query
+          required: true
+          description: "VAT number with country prefix"
+          schema:
+            type: string
+            example: "DE123456789"
+        - name: checkRegistry
+          in: query
+          required: false
+          description: "Check live VIES/HMRC registration (default false)"
+          schema:
+            type: boolean
+            example: "true"
+        - name: sellerCountryCode
+          in: query
+          required: false
+          description: "Seller country code; adds reverseChargeApplicable"
+          schema:
+            type: string
+            example: "FR"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /vat-validation-and-rates/validate/{vatNumber}:
+    get:
+      tags:
+        - VAT Validation And Rates
+      operationId: vatValidationAndRatesValidateNumber
+      summary: "Validate a VAT number from the URL path"
+      parameters:
+        - name: vatNumber
+          in: path
+          required: true
+          description: "VAT number with country prefix"
+          schema:
+            type: string
+            example: "DE123456789"
+        - name: checkRegistry
+          in: query
+          required: false
+          description: "Check live VIES/HMRC registration (default false)"
+          schema:
+            type: boolean
+            example: "true"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /vat-validation-and-rates/validate-batch:
+    post:
+      tags:
+        - VAT Validation And Rates
+      operationId: vatValidationAndRatesValidateBatch
+      summary: "Validate up to 50 VAT numbers"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - vatNumbers
+              properties:
+                vatNumbers:
+                  type: array
+                  description: "JSON array or comma-separated VAT numbers (1-50)"
+                  items: {}
+                checkRegistry:
+                  type: boolean
+                  description: "Check live VIES/HMRC registration (default false)"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+    get:
+      tags:
+        - VAT Validation And Rates
+      operationId: vatValidationAndRatesValidateBatchGet
+      summary: "Validate up to 50 comma-separated VAT numbers via GET"
+      parameters:
+        - name: vatNumbers
+          in: query
+          required: true
+          description: "Comma-separated VAT numbers (1-50)"
+          schema:
+            type: string
+            example: "DE123456789,FR40303265045"
+        - name: checkRegistry
+          in: query
+          required: false
+          description: "Check live VIES/HMRC registration (default false)"
+          schema:
+            type: boolean
+            example: "true"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /vat-validation-and-rates/calculate:
+    get:
+      tags:
+        - VAT Validation And Rates
+      operationId: vatValidationAndRatesCalculate
+      summary: "Calculate VAT for an amount"
+      parameters:
+        - name: amount
+          in: query
+          required: true
+          description: "Positive amount"
+          schema:
+            type: number
+            example: "100"
+        - name: countryCode
+          in: query
+          required: true
+          description: "Two-letter country code"
+          schema:
+            type: string
+            example: "DE"
+        - name: category
+          in: query
+          required: false
+          description: "Rate category: standard (default), reduced, reduced2, superReduced, parking, or zero"
+          schema:
+            type: string
+            example: "reduced"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /vat-validation-and-rates/calculate-batch:
+    post:
+      tags:
+        - VAT Validation And Rates
+      operationId: vatValidationAndRatesCalculateBatch
+      summary: "Calculate VAT for multiple amounts"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - conversions
+              properties:
+                conversions:
+                  type: array
+                  description: "JSON array of {\"amount\",\"countryCode\",\"category\"} objects"
+                  items: {}
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+    get:
+      tags:
+        - VAT Validation And Rates
+      operationId: vatValidationAndRatesCalculateBatchGet
+      summary: "Calculate VAT for multiple amounts via GET"
+      parameters:
+        - name: conversions
+          in: query
+          required: true
+          description: "JSON-encoded array of {\"amount\",\"countryCode\",\"category\"} objects"
+          schema:
+            type: string
+            example: "[{\"amount\":100,\"countryCode\":\"DE\"}]"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /vat-validation-and-rates/rates/{countryCode}:
+    get:
+      tags:
+        - VAT Validation And Rates
+      operationId: vatValidationAndRatesRates
+      summary: "Get VAT rates for a country"
+      parameters:
+        - name: countryCode
+          in: path
+          required: true
+          description: "Two-letter country code"
+          schema:
+            type: string
+            example: "DE"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /vat-validation-and-rates/rates/countries:
+    get:
+      tags:
+        - VAT Validation And Rates
+      operationId: vatValidationAndRatesRateCountries
+      summary: "List countries with VAT rate data"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /vat-validation-and-rates/catalog:
+    get:
+      tags:
+        - VAT Validation And Rates
+      operationId: vatValidationAndRatesCatalog
+      summary: "List supported countries, categories, and limits"
       responses:
         "200":
           description: Success
