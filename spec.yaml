@@ -24,20 +24,30 @@ tags:
     description: FAA aircraft registration lookup by tail, ICAO hex, and type code
   - name: Calendar
     description: Month, day, and range calendars with optional public-holiday overlays
+  - name: Color Convert
+    description: "Color conversion across formats with contrast and gradient helpers"
   - name: Convert Time
     description: Timezone-aware datetime conversion
   - name: Country Codes
     description: ISO 3166-1 country lookup, search, fuzzy match, and export
   - name: Current Time
     description: Current time by IANA timezone identifier
+  - name: Data Format Convert
+    description: "Convert data between JSON, CSV, XML, YAML, and spreadsheet formats"
+  - name: Deslop
+    description: "Detect and rewrite AI writing patterns in text"
   - name: Dictionary
     description: English word definitions, phonetics, and fuzzy suggestions
+  - name: Diffy
+    description: "Web page snapshots and change diffs against a previous snapshot"
   - name: DNS Lookup
     description: Forward and reverse DNS resolution for domains and IP addresses
   - name: Domain Lookup
     description: Domain TLD classification, regional metadata, and DNS presence checks
   - name: Economic Indicators
     description: "Macroeconomic indicator catalog, series history, and interest rates"
+  - name: Encoding Convert
+    description: "Encode, decode, hash, JWT-decode, normalize, and data-URI conversions"
   - name: EV Charger
     description: EV charging station search, station detail, and network/plug/level reference data
   - name: GDP
@@ -60,8 +70,12 @@ tags:
     description: Threat intelligence and risk scoring for IP addresses
   - name: LIBOR
     description: "SOFR-first benchmark rates with archival LIBOR history and tenor spreads"
+  - name: Lorem Ipsum
+    description: "Placeholder text generation as JSON, text, or HTML"
   - name: MAC Address
     description: MAC address vendor identification from IEEE OUI registry data
+  - name: Markdown Convert
+    description: "Markdown to HTML, HTML to Markdown, plaintext, and document outlines"
   - name: Market Cap
     description: "Company market capitalization lookups, history, trends, and rankings"
   - name: Mortgage Calculator
@@ -86,6 +100,8 @@ tags:
     description: Language detection with ISO codes and confidence scores
   - name: Thesaurus
     description: Synonyms, antonyms, and related terms from WordNet
+  - name: Translate
+    description: "Text translation between supported languages"
   - name: Unemployment
     description: "US unemployment rates, labor force, claims, demographics, and states"
   - name: Unit Conversion
@@ -8148,6 +8164,811 @@ paths:
         - VAT Validation And Rates
       operationId: vatValidationAndRatesCatalog
       summary: "List supported countries, categories, and limits"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /color-convert:
+    get:
+      tags:
+        - Color Convert
+      operationId: colorConvertConvert
+      summary: "Convert a color and optionally check contrast"
+      parameters:
+        - name: color
+          in: query
+          required: true
+          description: "Color in any supported format (hex, rgb, hsl, name)"
+          schema:
+            type: string
+            example: "#3B82F6"
+        - name: contrast_with
+          in: query
+          required: false
+          description: "Background color for contrast checks"
+          schema:
+            type: string
+            example: "#FFFFFF"
+        - name: gradient_angle
+          in: query
+          required: false
+          description: "Gradient angle (-360 to 360, default 90)"
+          schema:
+            type: number
+            example: "135"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /data-format-convert/convert:
+    post:
+      tags:
+        - Data Format Convert
+      operationId: dataFormatConvertConvert
+      summary: "Convert data from one format to another"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - inputFormat
+                - outputFormat
+                - data
+              properties:
+                inputFormat:
+                  type: string
+                  description: "Input format"
+                outputFormat:
+                  type: string
+                  description: "Output format"
+                data:
+                  type: string
+                  description: "Input data as a string (use --stdin to send JSON objects)"
+                options:
+                  type: object
+                  description: "Conversion options JSON (delimiter, pretty, xmlRoot, ...)"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /deslop/rules:
+    get:
+      tags:
+        - Deslop
+      operationId: deslopRules
+      summary: "List detection rules"
+      parameters:
+        - name: layer
+          in: query
+          required: false
+          description: "Rule layer (1-5)"
+          schema:
+            type: integer
+            example: "1"
+        - name: category
+          in: query
+          required: false
+          description: "Rule category"
+          schema:
+            type: string
+            example: "filler"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /deslop/analyze:
+    post:
+      tags:
+        - Deslop
+      operationId: deslopAnalyze
+      summary: "Analyze text for AI writing patterns"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: "Text to process (up to 200,000 characters)"
+                format:
+                  type: string
+                  description: "text (default) or markdown"
+                profile:
+                  type: string
+                  description: "Rule profile name"
+                categories:
+                  type: array
+                  description: "Rule categories to apply (JSON array or comma-separated)"
+                  items: {}
+                ignore:
+                  type: array
+                  description: "Rule IDs to ignore (JSON array or comma-separated)"
+                  items: {}
+                preserve:
+                  type: array
+                  description: "Content to preserve (JSON array or comma-separated)"
+                  items: {}
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+    get:
+      tags:
+        - Deslop
+      operationId: deslopAnalyzeGet
+      summary: "Analyze short text via GET"
+      parameters:
+        - name: text
+          in: query
+          required: true
+          description: "Text to analyze (short; use analyze for long text)"
+          schema:
+            type: string
+            example: "We delve into synergy."
+        - name: format
+          in: query
+          required: false
+          description: "text (default) or markdown"
+          schema:
+            type: string
+            example: "text"
+        - name: profile
+          in: query
+          required: false
+          description: "Rule profile name"
+          schema:
+            type: string
+            example: "default"
+        - name: categories
+          in: query
+          required: false
+          description: "Comma-separated rule categories"
+          schema:
+            type: string
+            example: "filler"
+        - name: ignore
+          in: query
+          required: false
+          description: "Comma-separated rule IDs to ignore"
+          schema:
+            type: string
+            example: "em-dash"
+        - name: preserve
+          in: query
+          required: false
+          description: "Comma-separated content to preserve"
+          schema:
+            type: string
+            example: "code"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /deslop/rewrite:
+    post:
+      tags:
+        - Deslop
+      operationId: deslopRewrite
+      summary: "Rewrite text to remove AI writing patterns"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: "Text to process (up to 200,000 characters)"
+                format:
+                  type: string
+                  description: "text (default) or markdown"
+                profile:
+                  type: string
+                  description: "Rule profile name"
+                categories:
+                  type: array
+                  description: "Rule categories to apply (JSON array or comma-separated)"
+                  items: {}
+                ignore:
+                  type: array
+                  description: "Rule IDs to ignore (JSON array or comma-separated)"
+                  items: {}
+                preserve:
+                  type: array
+                  description: "Content to preserve (JSON array or comma-separated)"
+                  items: {}
+                mode:
+                  type: string
+                  description: "light, balanced (default), or strict"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /diffy/snapshot:
+    post:
+      tags:
+        - Diffy
+      operationId: diffySnapshot
+      summary: "Capture a page snapshot and its diffable state"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  description: "Public HTTP(S) page URL"
+                render:
+                  type: string
+                  description: "auto (default), static, or browser"
+                max_chars:
+                  type: integer
+                  description: "Max output characters (1000-100000, default 20000)"
+                format:
+                  type: string
+                  description: "markdown (default), blocks, or tree"
+                include_state:
+                  type: boolean
+                  description: "Include state for later diffs (default true)"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /diffy/diff:
+    post:
+      tags:
+        - Diffy
+      operationId: diffyDiff
+      summary: "Diff a page against a previous snapshot state"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+                - previous_state
+              properties:
+                url:
+                  type: string
+                  description: "Public HTTP(S) page URL"
+                render:
+                  type: string
+                  description: "auto (default), static, or browser"
+                max_chars:
+                  type: integer
+                  description: "Max output characters (1000-100000, default 20000)"
+                previous_state:
+                  type: object
+                  description: "State JSON returned by snapshot"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /encoding-convert:
+    get:
+      tags:
+        - Encoding Convert
+      operationId: encodingConvertCatalog
+      summary: "List supported operations, encodings, and algorithms"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+    post:
+      tags:
+        - Encoding Convert
+      operationId: encodingConvertConvert
+      summary: "Run an encoding operation"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - operation
+                - input
+              properties:
+                operation:
+                  type: string
+                  description: "encode, decode, hash, jwt_decode, normalize, data_uri_encode, or data_uri_decode"
+                input:
+                  type: string
+                  description: "Text, encoded value, JWT, or data URI"
+                encoding:
+                  type: string
+                  description: "base64, base64url, base32, hex, url, html-entity, or punycode"
+                algorithm:
+                  type: string
+                  description: "Hash algorithm"
+                output:
+                  type: string
+                  description: "Hash output: hex, base64, or base64url"
+                form:
+                  type: string
+                  description: "Unicode form: NFC, NFD, NFKC, or NFKD"
+                mime_type:
+                  type: string
+                  description: "Data URI MIME type"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /lorem-ipsum/generate:
+    get:
+      tags:
+        - Lorem Ipsum
+      operationId: loremIpsumGenerate
+      summary: "Generate lorem ipsum words, sentences, or paragraphs"
+      parameters:
+        - name: units
+          in: query
+          required: false
+          description: "words, sentences, or paragraphs (default)"
+          schema:
+            type: string
+            example: "sentences"
+        - name: amount
+          in: query
+          required: false
+          description: "Number of units (default 3)"
+          schema:
+            type: integer
+            example: "5"
+        - name: length
+          in: query
+          required: false
+          description: "short, medium (default), long, or verylong"
+          schema:
+            type: string
+            example: "short"
+        - name: format
+          in: query
+          required: false
+          description: "json (default), text, or html"
+          schema:
+            type: string
+            example: "json"
+        - name: startWithLorem
+          in: query
+          required: false
+          description: "Start with 'Lorem ipsum' (default true)"
+          schema:
+            type: boolean
+            example: "false"
+        - name: seed
+          in: query
+          required: false
+          description: "Seed for deterministic output"
+          schema:
+            type: string
+            example: "demo"
+        - name: maxLength
+          in: query
+          required: false
+          description: "Maximum output characters"
+          schema:
+            type: integer
+            example: "500"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /markdown-convert/capabilities:
+    get:
+      tags:
+        - Markdown Convert
+      operationId: markdownConvertCapabilities
+      summary: "List supported targets, limits, and Markdown flavor"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /markdown-convert/to-html:
+    post:
+      tags:
+        - Markdown Convert
+      operationId: markdownConvertToHtml
+      summary: "Render Markdown to sanitized HTML"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - markdown
+              properties:
+                markdown:
+                  type: string
+                  description: "Markdown input"
+                allowRawHtml:
+                  type: boolean
+                  description: "Allow raw HTML (default false)"
+                breaks:
+                  type: boolean
+                  description: "Convert newlines to <br> (default false)"
+                linkify:
+                  type: boolean
+                  description: "Autolink URLs (default true)"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /markdown-convert/to-markdown:
+    post:
+      tags:
+        - Markdown Convert
+      operationId: markdownConvertToMarkdown
+      summary: "Convert HTML to Markdown"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - html
+              properties:
+                html:
+                  type: string
+                  description: "HTML input"
+                headingStyle:
+                  type: string
+                  description: "atx (default) or setext"
+                bulletMarker:
+                  type: string
+                  description: "Bullet marker: -, *, or +"
+                codeBlockStyle:
+                  type: string
+                  description: "fenced (default) or indented"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /markdown-convert/to-text:
+    post:
+      tags:
+        - Markdown Convert
+      operationId: markdownConvertToText
+      summary: "Render Markdown or HTML to plaintext"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                markdown:
+                  type: string
+                  description: "Markdown input (or pass --html)"
+                html:
+                  type: string
+                  description: "HTML input (or pass --markdown)"
+                wrap:
+                  type: integer
+                  description: "Wrap column (0-200, default 0 = no wrap)"
+                includeLinkUrls:
+                  type: boolean
+                  description: "Include link URLs (default false)"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /markdown-convert/outline:
+    post:
+      tags:
+        - Markdown Convert
+      operationId: markdownConvertOutline
+      summary: "Get document structure and statistics"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                markdown:
+                  type: string
+                  description: "Markdown input (or pass --html)"
+                html:
+                  type: string
+                  description: "HTML input (or pass --markdown)"
+                tocMinLevel:
+                  type: integer
+                  description: "Minimum heading level (default 1)"
+                tocMaxLevel:
+                  type: integer
+                  description: "Maximum heading level (default 6)"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /markdown-convert/batch:
+    post:
+      tags:
+        - Markdown Convert
+      operationId: markdownConvertBatch
+      summary: "Process up to 25 documents in one request"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - documents
+              properties:
+                documents:
+                  type: array
+                  description: "JSON array of {\"target\",\"markdown\"|\"html\"} documents"
+                  items: {}
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /translate:
+    post:
+      tags:
+        - Translate
+      operationId: translateText
+      summary: "Translate one text or a batch of texts"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - targetLang
+              properties:
+                targetLang:
+                  type: string
+                  description: "Target language code"
+                text:
+                  type: string
+                  description: "Text to translate (or pass --texts)"
+                texts:
+                  type: array
+                  description: "JSON array or comma-separated texts to translate"
+                  items: {}
+                sourceLang:
+                  type: string
+                  description: "Source language code (default auto)"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /translate/languages:
+    get:
+      tags:
+        - Translate
+      operationId: translateLanguages
+      summary: "List supported languages"
       responses:
         "200":
           description: Success
