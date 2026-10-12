@@ -6299,70 +6299,70 @@ paths:
           description: "Annual percentage rate"
           schema:
             type: number
-            example: "6.5"
+            example: 6.5
         - name: loan_amount
           in: query
           required: false
           description: "Loan principal (or pass --home-value and --downpayment)"
           schema:
             type: number
-            example: "350000"
+            example: 350000
         - name: home_value
           in: query
           required: false
           description: "Home value, used with --downpayment"
           schema:
             type: number
-            example: "400000"
+            example: 400000
         - name: downpayment
           in: query
           required: false
           description: "Down payment, less than --home-value"
           schema:
             type: number
-            example: "50000"
+            example: 50000
         - name: duration_years
           in: query
           required: false
           description: "Loan term in years (default 30)"
           schema:
             type: number
-            example: "30"
+            example: 30
         - name: monthly_extra_payment
           in: query
           required: false
           description: "Additional monthly principal payment"
           schema:
             type: number
-            example: "200"
+            example: 200
         - name: monthly_hoa
           in: query
           required: false
           description: "Monthly HOA amount"
           schema:
             type: number
-            example: "150"
+            example: 150
         - name: annual_property_tax
           in: query
           required: false
           description: "Annual property tax"
           schema:
             type: number
-            example: "4800"
+            example: 4800
         - name: annual_home_insurance
           in: query
           required: false
           description: "Annual home insurance"
           schema:
             type: number
-            example: "1200"
+            example: 1200
         - name: includeSchedule
           in: query
           required: false
           description: "Include an amortization schedule"
           schema:
             type: boolean
-            example: "true"
+            example: true
         - name: start_date
           in: query
           required: false
@@ -6376,7 +6376,7 @@ paths:
           description: "Annual home appreciation percentage (-100 to 100)"
           schema:
             type: number
-            example: "3"
+            example: 3
       responses:
         "200":
           description: Success
@@ -6405,42 +6405,42 @@ paths:
           description: "Current loan balance"
           schema:
             type: number
-            example: "280000"
+            example: 280000
         - name: current_interest_rate
           in: query
           required: true
           description: "Current annual rate"
           schema:
             type: number
-            example: "7"
+            example: 7
         - name: current_remaining_years
           in: query
           required: true
           description: "Current remaining term in years"
           schema:
             type: number
-            example: "25"
+            example: 25
         - name: new_interest_rate
           in: query
           required: true
           description: "Proposed annual rate"
           schema:
             type: number
-            example: "5.75"
+            example: 5.75
         - name: new_duration_years
           in: query
           required: true
           description: "Proposed term in years"
           schema:
             type: number
-            example: "25"
+            example: 25
         - name: refinance_cost
           in: query
           required: false
           description: "Refinance closing cost"
           schema:
             type: number
-            example: "5000"
+            example: 5000
       responses:
         "200":
           description: Success
@@ -6518,7 +6518,7 @@ paths:
           description: "Observations (1-60, default 12)"
           schema:
             type: integer
-            example: "24"
+            example: 24
       responses:
         "200":
           description: Success
@@ -6718,7 +6718,7 @@ paths:
           description: "Trailing observations (2-80, default 12)"
           schema:
             type: integer
-            example: "12"
+            example: 12
       responses:
         "200":
           description: Success
@@ -6961,7 +6961,7 @@ paths:
           description: "Number of companies (1-50, default 5)"
           schema:
             type: integer
-            example: "5"
+            example: 5
         - name: sector
           in: query
           required: false
@@ -6982,14 +6982,14 @@ paths:
           description: "Inclusive lower market cap bound"
           schema:
             type: number
-            example: "100000000000"
+            example: 100000000000
         - name: maxMarketCap
           in: query
           required: false
           description: "Inclusive upper market cap bound"
           schema:
             type: number
-            example: "3000000000000"
+            example: 3000000000000
       responses:
         "200":
           description: Success
@@ -7160,14 +7160,14 @@ paths:
           description: "Max filings (1-100, default 20)"
           schema:
             type: integer
-            example: "20"
+            example: 20
         - name: offset
           in: query
           required: false
           description: "Pagination offset (0-2000)"
           schema:
             type: integer
-            example: "0"
+            example: 0
         - name: fromDate
           in: query
           required: false
@@ -7238,14 +7238,14 @@ paths:
           description: "Max filings (1-100, default 20)"
           schema:
             type: integer
-            example: "20"
+            example: 20
         - name: offset
           in: query
           required: false
           description: "Pagination offset (0-2000)"
           schema:
             type: integer
-            example: "0"
+            example: 0
         - name: fromDate
           in: query
           required: false
@@ -7323,7 +7323,7 @@ paths:
           description: "Max facts (1-40, default 12)"
           schema:
             type: integer
-            example: "12"
+            example: 12
       responses:
         "200":
           description: Success
@@ -7359,7 +7359,7 @@ paths:
           description: "Seasonally adjusted series (default true)"
           schema:
             type: boolean
-            example: "false"
+            example: false
       responses:
         "200":
           description: Success
@@ -7762,7 +7762,7 @@ paths:
           description: "Gross income"
           schema:
             type: number
-            example: "120000"
+            example: 120000
         - name: filingStatus
           in: query
           required: false
@@ -7776,28 +7776,28 @@ paths:
           description: "Tax year (default 2024)"
           schema:
             type: integer
-            example: "2024"
+            example: 2024
         - name: deductions
           in: query
           required: false
           description: "Deductions beyond the standard deduction"
           schema:
             type: number
-            example: "5000"
+            example: 5000
         - name: taxCredits
           in: query
           required: false
           description: "Federal tax credits"
           schema:
             type: number
-            example: "2000"
+            example: 2000
         - name: stateRate
           in: query
           required: false
           description: "State tax rate percentage (0-20)"
           schema:
             type: number
-            example: "5.5"
+            example: 5.5
       responses:
         "200":
           description: Success
@@ -7833,7 +7833,7 @@ paths:
           description: "Tax year (default 2024)"
           schema:
             type: integer
-            example: "2024"
+            example: 2024
       responses:
         "200":
           description: Success
@@ -7890,7 +7890,7 @@ paths:
           description: "Check live VIES/HMRC registration (default false)"
           schema:
             type: boolean
-            example: "true"
+            example: true
         - name: sellerCountryCode
           in: query
           required: false
@@ -7933,7 +7933,7 @@ paths:
           description: "Check live VIES/HMRC registration (default false)"
           schema:
             type: boolean
-            example: "true"
+            example: true
       responses:
         "200":
           description: Success
@@ -8005,7 +8005,7 @@ paths:
           description: "Check live VIES/HMRC registration (default false)"
           schema:
             type: boolean
-            example: "true"
+            example: true
       responses:
         "200":
           description: Success
@@ -8034,7 +8034,7 @@ paths:
           description: "Positive amount"
           schema:
             type: number
-            example: "100"
+            example: 100
         - name: countryCode
           in: query
           required: true
@@ -8224,7 +8224,7 @@ paths:
           description: "Gradient angle (-360 to 360, default 90)"
           schema:
             type: number
-            example: "135"
+            example: 135
       responses:
         "200":
           description: Success
@@ -8297,7 +8297,7 @@ paths:
           description: "Rule layer (1-5)"
           schema:
             type: integer
-            example: "1"
+            example: 1
         - name: category
           in: query
           required: false
@@ -8668,7 +8668,7 @@ paths:
           description: "Number of units (default 3)"
           schema:
             type: integer
-            example: "5"
+            example: 5
         - name: length
           in: query
           required: false
@@ -8689,7 +8689,7 @@ paths:
           description: "Start with 'Lorem ipsum' (default true)"
           schema:
             type: boolean
-            example: "false"
+            example: false
         - name: seed
           in: query
           required: false
@@ -8703,7 +8703,7 @@ paths:
           description: "Maximum output characters"
           schema:
             type: integer
-            example: "500"
+            example: 500
       responses:
         "200":
           description: Success
@@ -9620,7 +9620,7 @@ paths:
           description: "Include brand color palette (default true)"
           schema:
             type: boolean
-            example: "false"
+            example: false
       responses:
         "200":
           description: Success

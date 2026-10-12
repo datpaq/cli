@@ -5,6 +5,10 @@
 package mcp
 
 import (
+	"context"
+	"fmt"
+	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/datpaq/cli/internal/cli"
@@ -47,7 +51,11 @@ func declaredTool(group string, ep cli.APIEndpoint) mcplib.Tool {
 
 	opts := []mcplib.ToolOption{mcplib.WithDescription(desc)}
 	for _, p := range ep.Params {
-		popts := []mcplib.PropertyOption{mcplib.Description(p.Usage)}
+		usage := p.Usage
+		if p.Type == "file" || p.Type == "files" {
+			usage += " (base64-encoded file content)"
+		}
+		popts := []mcplib.PropertyOption{mcplib.Description(usage)}
 		if p.Required || p.In == "path" {
 			popts = append(popts, mcplib.Required())
 		}
@@ -84,7 +92,33 @@ func declaredHandler(ep cli.APIEndpoint) server.ToolHandlerFunc {
 		}
 		bindings = append(bindings, mcpParamBinding{PublicName: declaredPublicName(p), WireName: p.WireName(), Location: loc})
 	}
-	return makeAPIHandler(ep.Method, ep.Path, false, nil, bindings, nil)
+	inner := makeAPIHandler(ep.Method, ep.Path, false, nil, bindings, nil)
+	return func(ctx context.Context, req mcplib.CallToolRequest) (*mcplib.CallToolResult, error) {
+		normalizeDeclaredArgs(ep, req.GetArguments())
+		return inner(ctx, req)
+	}
+}
+
+// normalizeDeclaredArgs fixes values that makeAPIHandler would format with
+// %v: JSON numbers bound to query/path become plain decimals (not 1e+06), and
+// path values are URL-escaped. File params are passed through as base64; the
+// MCP server never reads local paths on a caller's behalf.
+func normalizeDeclaredArgs(ep cli.APIEndpoint, args map[string]any) {
+	for _, p := range ep.Params {
+		name := declaredPublicName(p)
+		v, ok := args[name]
+		if !ok || p.In == "body" {
+			continue
+		}
+		s := fmt.Sprintf("%v", v)
+		if f, isNum := v.(float64); isNum {
+			s = strconv.FormatFloat(f, 'f', -1, 64)
+		}
+		if p.In == "path" {
+			s = url.PathEscape(s)
+		}
+		args[name] = s
+	}
 }
 
 // declaredContextResources lists declared groups for the MCP context tool.

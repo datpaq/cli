@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -119,17 +120,13 @@ func newDeclaredEndpointCmd(flags *rootFlags, group string, ep APIEndpoint) *cob
 				path = strings.Replace(path, "{"+p.WireName()+"}", url.PathEscape(v), 1)
 			}
 
-			if isBodyMethod && stdinBody {
-				body, err := readStdinJSONBody()
-				if err != nil {
-					return err
-				}
-				return postMutation(cmd, flags, group, path, body)
-			}
-
+			useStdin := isBodyMethod && stdinBody
 			query := map[string]string{}
 			body := map[string]any{}
 			for _, p := range flagParams {
+				if useStdin && p.In == "body" {
+					continue // the stdin JSON replaces every body flag
+				}
 				if p.Required {
 					if err := requireFlag(cmd, flags, p.Flag); err != nil {
 						return err
@@ -139,6 +136,11 @@ func newDeclaredEndpointCmd(flags *rootFlags, group string, ep APIEndpoint) *cob
 					continue
 				}
 				raw := cmd.Flags().Lookup(p.Flag).Value.String()
+				if p.Type == "float" {
+					// pflag renders floats with %g (1e+06); APIs expect plain decimals.
+					f, _ := cmd.Flags().GetFloat64(p.Flag)
+					raw = strconv.FormatFloat(f, 'f', -1, 64)
+				}
 				if p.In == "body" {
 					v, err := declaredBodyValue(p, raw)
 					if err != nil {
@@ -150,13 +152,21 @@ func newDeclaredEndpointCmd(flags *rootFlags, group string, ep APIEndpoint) *cob
 				}
 			}
 
+			if useStdin {
+				stdin, err := readStdinJSONBody()
+				if err != nil {
+					return err
+				}
+				body = stdin
+			}
+
 			switch ep.Method {
 			case "GET":
 				return printReadResponse(cmd, flags, group, path, query)
 			case "DELETE":
 				return deleteMutation(cmd, flags, group, path, query)
 			default:
-				return postMutationWithQuery(cmd, flags, group, path, query, body)
+				return bodyMutation(cmd, flags, ep.Method, group, path, query, body)
 			}
 		},
 	}
@@ -254,16 +264,23 @@ func shellQuoteExample(v string) string {
 	return v
 }
 
-func postMutationWithQuery(cmd *cobra.Command, flags *rootFlags, resource, path string, query map[string]string, body map[string]any) error {
+func bodyMutation(cmd *cobra.Command, flags *rootFlags, method, resource, path string, query map[string]string, body map[string]any) error {
 	c, err := flags.newClient()
 	if err != nil {
 		return err
 	}
-	data, statusCode, err := c.PostWithParams(path, query, body)
+	send := c.PostWithParams
+	switch method {
+	case "PUT":
+		send = c.PutWithParams
+	case "PATCH":
+		send = c.PatchWithParams
+	}
+	data, statusCode, err := send(path, query, body)
 	if err != nil {
 		return classifyAPIError(err, flags)
 	}
-	return printMutationResponse(cmd, flags, resource, path, statusCode, data)
+	return printMutationResponseAs(cmd, flags, strings.ToLower(method), resource, path, statusCode, data)
 }
 
 func deleteMutation(cmd *cobra.Command, flags *rootFlags, resource, path string, query map[string]string) error {
@@ -275,7 +292,7 @@ func deleteMutation(cmd *cobra.Command, flags *rootFlags, resource, path string,
 	if err != nil {
 		return classifyAPIError(err, flags)
 	}
-	return printMutationResponse(cmd, flags, resource, path, statusCode, data)
+	return printMutationResponseAs(cmd, flags, "delete", resource, path, statusCode, data)
 }
 
 // declaredWhichEntries feeds every declared endpoint into `datpaq which`.
