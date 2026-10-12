@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "applied_at": "2026-08-31",
+  "applied_at": "2026-10-12",
   "base_run_id": "20260521-153730",
   "base_printing_press_version": "4.10.0",
   "patches": [
@@ -238,6 +238,17 @@
         "internal/cli/auth_login_test.go"
       ],
       "validated_outcome": "Focused auth tests assert the top-left wordmark, green success icon, copyright footer, and removal of the retired purple and animated-footer styling."
+    },
+    {
+      "id": "staging-catalog-63-discovery-sync",
+      "summary": "Re-activate web-search and deactivate exchange-rates-and-currency to match the staging.datpaq.com 63-API catalog; sync spec.yaml.",
+      "reason": "Staging /api-list (63 APIs, shipping to production week of 2026-10-12) includes web-search and omits exchange-rates-and-currency. Deactivated commands stay callable.",
+      "files": [
+        "internal/cli/active-apis.json",
+        "internal/cli/active_apis_test.go",
+        "spec.yaml"
+      ],
+      "validated_outcome": "go test ./internal/cli ./internal/mcp passes; datpaq api --agent lists 35 interfaces including web-search, excluding exchange-rates-and-currency."
     }
   ]
 }
