@@ -36,8 +36,12 @@ tags:
     description: Forward and reverse DNS resolution for domains and IP addresses
   - name: Domain Lookup
     description: Domain TLD classification, regional metadata, and DNS presence checks
+  - name: Economic Indicators
+    description: "Macroeconomic indicator catalog, series history, and interest rates"
   - name: EV Charger
     description: EV charging station search, station detail, and network/plug/level reference data
+  - name: GDP
+    description: "US GDP levels, history, growth, and dataset comparison"
   - name: Geocoding
     description: Forward, reverse, and batch geocoding via OpenStreetMap Nominatim
   - name: Helicopter
@@ -54,6 +58,8 @@ tags:
     description: "SOFR-first benchmark rates with archival LIBOR history and tenor spreads"
   - name: MAC Address
     description: MAC address vendor identification from IEEE OUI registry data
+  - name: Market Cap
+    description: "Company market capitalization lookups, history, trends, and rankings"
   - name: Mortgage Calculator
     description: "Mortgage payment, refinance break-even, and current mortgage rates"
   - name: MX Lookup
@@ -68,12 +74,16 @@ tags:
     description: QR code generation (PNG/SVG) and decode from a base64 image
   - name: Sample Data
     description: Mock data generation for testing and development (Faker.js)
+  - name: SEC Filings
+    description: "SEC EDGAR company profiles, filings, and XBRL facts"
   - name: Spell Check
     description: Multilingual spelling correction with optional grammar hints
   - name: Text Language
     description: Language detection with ISO codes and confidence scores
   - name: Thesaurus
     description: Synonyms, antonyms, and related terms from WordNet
+  - name: Unemployment
+    description: "US unemployment rates, labor force, claims, demographics, and states"
   - name: Unit Conversion
     description: Unit conversion across 100+ measurement types
   - name: US States
@@ -6412,6 +6422,1155 @@ paths:
         - Mortgage Calculator
       operationId: mortgageCalculatorCurrentRates
       summary: "Get weekly average mortgage rates from FRED"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /economic-indicators/indicators:
+    get:
+      tags:
+        - Economic Indicators
+      operationId: economicIndicatorsIndicators
+      summary: "List available indicators"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /economic-indicators/series/{id}:
+    get:
+      tags:
+        - Economic Indicators
+      operationId: economicIndicatorsSeries
+      summary: "Get history for an indicator"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Catalog indicator ID"
+          schema:
+            type: string
+            example: "us_gdp_growth"
+        - name: limit
+          in: query
+          required: false
+          description: "Observations (1-60, default 12)"
+          schema:
+            type: integer
+            example: "24"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /economic-indicators/series/{id}/latest:
+    get:
+      tags:
+        - Economic Indicators
+      operationId: economicIndicatorsLatest
+      summary: "Get the latest value for an indicator"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Catalog indicator ID"
+          schema:
+            type: string
+            example: "us_gdp_growth"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /economic-indicators/interest-rates:
+    get:
+      tags:
+        - Economic Indicators
+      operationId: economicIndicatorsInterestRates
+      summary: "Get key interest rates"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /gdp:
+    get:
+      tags:
+        - GDP
+      operationId: gdpLatest
+      summary: "Get the latest GDP observation"
+      parameters:
+        - name: dataset
+          in: query
+          required: false
+          description: "Dataset: nominal (default), real, or deflator"
+          schema:
+            type: string
+            example: "nominal"
+        - name: source
+          in: query
+          required: false
+          description: "Source mode: auto (default), snapshot, or live"
+          schema:
+            type: string
+            example: "snapshot"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /gdp/history:
+    get:
+      tags:
+        - GDP
+      operationId: gdpHistory
+      summary: "Get GDP history"
+      parameters:
+        - name: dataset
+          in: query
+          required: false
+          description: "Dataset: nominal (default), real, or deflator"
+          schema:
+            type: string
+            example: "nominal"
+        - name: source
+          in: query
+          required: false
+          description: "Source mode: auto (default), snapshot, or live"
+          schema:
+            type: string
+            example: "snapshot"
+        - name: period
+          in: query
+          required: false
+          description: "Window: latest, 1y, 5y (default), or 10y"
+          schema:
+            type: string
+            example: "5y"
+        - name: startDate
+          in: query
+          required: false
+          description: "Inclusive lower bound (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2023-01-01"
+        - name: endDate
+          in: query
+          required: false
+          description: "Inclusive upper bound (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2026-06-01"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /gdp/growth:
+    get:
+      tags:
+        - GDP
+      operationId: gdpGrowth
+      summary: "Get GDP growth rates"
+      parameters:
+        - name: dataset
+          in: query
+          required: false
+          description: "Dataset: nominal (default), real, or deflator"
+          schema:
+            type: string
+            example: "nominal"
+        - name: source
+          in: query
+          required: false
+          description: "Source mode: auto (default), snapshot, or live"
+          schema:
+            type: string
+            example: "snapshot"
+        - name: startDate
+          in: query
+          required: false
+          description: "Inclusive lower bound (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2023-01-01"
+        - name: endDate
+          in: query
+          required: false
+          description: "Inclusive upper bound (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2026-06-01"
+        - name: points
+          in: query
+          required: false
+          description: "Trailing observations (2-80, default 12)"
+          schema:
+            type: integer
+            example: "12"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /gdp/compare:
+    get:
+      tags:
+        - GDP
+      operationId: gdpCompare
+      summary: "Compare GDP datasets"
+      parameters:
+        - name: source
+          in: query
+          required: false
+          description: "Source mode: auto (default), snapshot, or live"
+          schema:
+            type: string
+            example: "snapshot"
+        - name: period
+          in: query
+          required: false
+          description: "Window: latest, 1y, 5y (default), or 10y"
+          schema:
+            type: string
+            example: "5y"
+        - name: datasets
+          in: query
+          required: false
+          description: "Comma-separated datasets (default all)"
+          schema:
+            type: string
+            example: "nominal,real"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /gdp/catalog:
+    get:
+      tags:
+        - GDP
+      operationId: gdpCatalog
+      summary: "List datasets, sources, and periods"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /market-cap:
+    get:
+      tags:
+        - Market Cap
+      operationId: marketCapLookup
+      summary: "Get market cap for a symbol"
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: "Ticker symbol"
+          schema:
+            type: string
+            example: "AAPL"
+        - name: mode
+          in: query
+          required: false
+          description: "Data mode: snapshot (default) or live"
+          schema:
+            type: string
+            example: "snapshot"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /market-cap/history:
+    get:
+      tags:
+        - Market Cap
+      operationId: marketCapHistory
+      summary: "Get market cap history for a symbol"
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: "Ticker symbol"
+          schema:
+            type: string
+            example: "AAPL"
+        - name: mode
+          in: query
+          required: false
+          description: "Data mode: snapshot (default) or live"
+          schema:
+            type: string
+            example: "snapshot"
+        - name: period
+          in: query
+          required: false
+          description: "Period: 1m, 3m, 6m, 1y, 3y, or 5y"
+          schema:
+            type: string
+            example: "1y"
+        - name: startDate
+          in: query
+          required: false
+          description: "Inclusive lower bound (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2025-01-01"
+        - name: endDate
+          in: query
+          required: false
+          description: "Inclusive upper bound (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2026-07-01"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /market-cap/trend:
+    get:
+      tags:
+        - Market Cap
+      operationId: marketCapTrend
+      summary: "Get market cap trend statistics for a symbol"
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: "Ticker symbol"
+          schema:
+            type: string
+            example: "AAPL"
+        - name: mode
+          in: query
+          required: false
+          description: "Data mode: snapshot (default) or live"
+          schema:
+            type: string
+            example: "snapshot"
+        - name: period
+          in: query
+          required: false
+          description: "Period: 1m, 3m, 6m, 1y, 3y, or 5y"
+          schema:
+            type: string
+            example: "1y"
+        - name: startDate
+          in: query
+          required: false
+          description: "Inclusive lower bound (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2025-01-01"
+        - name: endDate
+          in: query
+          required: false
+          description: "Inclusive upper bound (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2026-07-01"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /market-cap/top:
+    get:
+      tags:
+        - Market Cap
+      operationId: marketCapTop
+      summary: "List the largest companies by market cap"
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: "Number of companies (1-50, default 5)"
+          schema:
+            type: integer
+            example: "5"
+        - name: sector
+          in: query
+          required: false
+          description: "Exact sector filter"
+          schema:
+            type: string
+            example: "Technology"
+        - name: sort
+          in: query
+          required: false
+          description: "Sort order: desc (default) or asc"
+          schema:
+            type: string
+            example: "desc"
+        - name: minMarketCap
+          in: query
+          required: false
+          description: "Inclusive lower market cap bound"
+          schema:
+            type: number
+            example: "100000000000"
+        - name: maxMarketCap
+          in: query
+          required: false
+          description: "Inclusive upper market cap bound"
+          schema:
+            type: number
+            example: "3000000000000"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /market-cap/compare:
+    get:
+      tags:
+        - Market Cap
+      operationId: marketCapCompare
+      summary: "Compare market caps across symbols"
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: "Comma-separated symbols (at least two)"
+          schema:
+            type: string
+            example: "AAPL,MSFT,NVDA"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /market-cap/catalog:
+    get:
+      tags:
+        - Market Cap
+      operationId: marketCapCatalog
+      summary: "List supported symbols, sectors, and periods"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /sec-filings/catalog:
+    get:
+      tags:
+        - SEC Filings
+      operationId: secFilingsCatalog
+      summary: "List supported forms, taxonomies, and limits"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /sec-filings/company:
+    get:
+      tags:
+        - SEC Filings
+      operationId: secFilingsCompany
+      summary: "Get a company profile by CIK or ticker"
+      parameters:
+        - name: cik
+          in: query
+          required: false
+          description: "SEC CIK identifier (or pass --ticker)"
+          schema:
+            type: string
+            example: "320193"
+        - name: ticker
+          in: query
+          required: false
+          description: "Stock ticker (or pass --cik)"
+          schema:
+            type: string
+            example: "AAPL"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /sec-filings/filings:
+    get:
+      tags:
+        - SEC Filings
+      operationId: secFilingsFilings
+      summary: "List recent filings for a company"
+      parameters:
+        - name: form
+          in: query
+          required: false
+          description: "Single form filter"
+          schema:
+            type: string
+            example: "10-K"
+        - name: forms
+          in: query
+          required: false
+          description: "Comma-separated form filters"
+          schema:
+            type: string
+            example: "10-K,10-Q"
+        - name: cik
+          in: query
+          required: false
+          description: "SEC CIK identifier (or pass --ticker)"
+          schema:
+            type: string
+            example: "320193"
+        - name: ticker
+          in: query
+          required: false
+          description: "Stock ticker (or pass --cik)"
+          schema:
+            type: string
+            example: "AAPL"
+        - name: sort
+          in: query
+          required: false
+          description: "Filing date order: desc (default) or asc"
+          schema:
+            type: string
+            example: "desc"
+        - name: limit
+          in: query
+          required: false
+          description: "Max filings (1-100, default 20)"
+          schema:
+            type: integer
+            example: "20"
+        - name: offset
+          in: query
+          required: false
+          description: "Pagination offset (0-2000)"
+          schema:
+            type: integer
+            example: "0"
+        - name: fromDate
+          in: query
+          required: false
+          description: "Inclusive lower filing date (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2024-01-01"
+        - name: toDate
+          in: query
+          required: false
+          description: "Inclusive upper filing date (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2024-12-31"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /sec-filings/forms/{formType}:
+    get:
+      tags:
+        - SEC Filings
+      operationId: secFilingsForms
+      summary: "List a company's filings of one form type"
+      parameters:
+        - name: formType
+          in: path
+          required: true
+          description: "Form type"
+          schema:
+            type: string
+            example: "10-K"
+        - name: cik
+          in: query
+          required: false
+          description: "SEC CIK identifier (or pass --ticker)"
+          schema:
+            type: string
+            example: "320193"
+        - name: ticker
+          in: query
+          required: false
+          description: "Stock ticker (or pass --cik)"
+          schema:
+            type: string
+            example: "AAPL"
+        - name: sort
+          in: query
+          required: false
+          description: "Filing date order: desc (default) or asc"
+          schema:
+            type: string
+            example: "desc"
+        - name: limit
+          in: query
+          required: false
+          description: "Max filings (1-100, default 20)"
+          schema:
+            type: integer
+            example: "20"
+        - name: offset
+          in: query
+          required: false
+          description: "Pagination offset (0-2000)"
+          schema:
+            type: integer
+            example: "0"
+        - name: fromDate
+          in: query
+          required: false
+          description: "Inclusive lower filing date (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2024-01-01"
+        - name: toDate
+          in: query
+          required: false
+          description: "Inclusive upper filing date (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2024-12-31"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /sec-filings/facts:
+    get:
+      tags:
+        - SEC Filings
+      operationId: secFilingsFacts
+      summary: "Get XBRL concept facts for a company"
+      parameters:
+        - name: cik
+          in: query
+          required: false
+          description: "SEC CIK identifier (or pass --ticker)"
+          schema:
+            type: string
+            example: "320193"
+        - name: ticker
+          in: query
+          required: false
+          description: "Stock ticker (or pass --cik)"
+          schema:
+            type: string
+            example: "AAPL"
+        - name: tag
+          in: query
+          required: true
+          description: "XBRL concept tag"
+          schema:
+            type: string
+            example: "Assets"
+        - name: taxonomy
+          in: query
+          required: false
+          description: "XBRL taxonomy (default us-gaap)"
+          schema:
+            type: string
+            example: "us-gaap"
+        - name: units
+          in: query
+          required: false
+          description: "Preferred unit key"
+          schema:
+            type: string
+            example: "USD"
+        - name: limit
+          in: query
+          required: false
+          description: "Max facts (1-40, default 12)"
+          schema:
+            type: integer
+            example: "12"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /unemployment:
+    get:
+      tags:
+        - Unemployment
+      operationId: unemploymentNational
+      summary: "Get the national unemployment rate"
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: "Window: latest, 1y, 5y, or 10y (default latest)"
+          schema:
+            type: string
+            example: "1y"
+        - name: adjusted
+          in: query
+          required: false
+          description: "Seasonally adjusted series (default true)"
+          schema:
+            type: boolean
+            example: "false"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /unemployment/measures:
+    get:
+      tags:
+        - Unemployment
+      operationId: unemploymentMeasures
+      summary: "Get U-1 through U-6 measures"
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: "Window: latest, 1y, or 5y (default latest)"
+          schema:
+            type: string
+            example: "1y"
+        - name: measure
+          in: query
+          required: false
+          description: "Measure: u1-u6 or all (default)"
+          schema:
+            type: string
+            example: "u6"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /unemployment/labor-force:
+    get:
+      tags:
+        - Unemployment
+      operationId: unemploymentLaborForce
+      summary: "Get participation and employment-population ratios"
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: "Window: latest, 1y, or 5y (default latest)"
+          schema:
+            type: string
+            example: "1y"
+        - name: metric
+          in: query
+          required: false
+          description: "Metric: participation, employment-ratio, or both (default)"
+          schema:
+            type: string
+            example: "participation"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /unemployment/claims:
+    get:
+      tags:
+        - Unemployment
+      operationId: unemploymentClaims
+      summary: "Get initial and continued jobless claims"
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: "Window: latest, 1y, or 2y (default latest)"
+          schema:
+            type: string
+            example: "1y"
+        - name: type
+          in: query
+          required: false
+          description: "Claims type: initial, continued, or both (default)"
+          schema:
+            type: string
+            example: "initial"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /unemployment/long-term:
+    get:
+      tags:
+        - Unemployment
+      operationId: unemploymentLongTerm
+      summary: "Get long-term unemployment"
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: "Window: latest, 1y, or 5y (default latest)"
+          schema:
+            type: string
+            example: "1y"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /unemployment/demographic:
+    get:
+      tags:
+        - Unemployment
+      operationId: unemploymentDemographic
+      summary: "Get unemployment by demographic group"
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: "Window: latest or 1y (default latest)"
+          schema:
+            type: string
+            example: "1y"
+        - name: group
+          in: query
+          required: true
+          description: "Group: age, gender, race, or education"
+          schema:
+            type: string
+            example: "race"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /unemployment/state:
+    get:
+      tags:
+        - Unemployment
+      operationId: unemploymentState
+      summary: "Get unemployment for one state or DC"
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: "Window: latest or 1y (default latest)"
+          schema:
+            type: string
+            example: "1y"
+        - name: state
+          in: query
+          required: true
+          description: "Two-letter US state or DC code"
+          schema:
+            type: string
+            example: "CA"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /unemployment/states:
+    get:
+      tags:
+        - Unemployment
+      operationId: unemploymentStates
+      summary: "Get latest unemployment for all states and DC"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /unemployment/series:
+    get:
+      tags:
+        - Unemployment
+      operationId: unemploymentSeries
+      summary: "List the unemployment series catalog"
       responses:
         "200":
           description: Success

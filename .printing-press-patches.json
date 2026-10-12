@@ -283,6 +283,22 @@
         "spec.yaml"
       ],
       "validated_outcome": "MCP test asserts each declared endpoint has a tool with all params; spec parity test covers every declared operation and wire param; go test ./... passes."
+    },
+    {
+      "id": "staging-catalog-finance-econ-apis",
+      "summary": "Add market-cap, sec-filings, gdp, economic-indicators, and unemployment via the declared endpoint table.",
+      "reason": "These services are in the staging 63-API catalog; unemployment metro routes are omitted because ProApi hard-codes 503 for them.",
+      "files": [
+        "internal/cli/active-apis.json",
+        "internal/cli/active_apis_test.go",
+        "spec.yaml",
+        "internal/cli/market-cap.go",
+        "internal/cli/sec-filings.go",
+        "internal/cli/gdp.go",
+        "internal/cli/economic-indicators.go",
+        "internal/cli/unemployment.go"
+      ],
+      "validated_outcome": "go test ./... passes: table-driven request, required-flag, MCP-param, and spec.yaml parity tests cover every new endpoint."
     }
   ]
 }
