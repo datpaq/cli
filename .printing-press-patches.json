@@ -367,6 +367,19 @@
         "internal/cli/ping-human.go"
       ],
       "validated_outcome": "go test ./... passes: table-driven request, required-flag, MCP-param, and spec.yaml parity tests cover every new endpoint."
+    },
+    {
+      "id": "api-sync-runbook",
+      "summary": "Add docs/adding-apis.md and scripts/api-sync tooling for table-declared APIs; pass path args in the required-flag test.",
+      "reason": "40+ more ProApi services are coming; the runbook and finisher script make adding them repeatable, and a throwaway-API dry run exposed the test gap for path+required-flag endpoints.",
+      "files": [
+        "docs/adding-apis.md",
+        "scripts/api-sync/add-api.sh",
+        "scripts/api-sync/catalog.py",
+        "internal/cli/declared_api_test.go",
+        "AGENTS.md"
+      ],
+      "validated_outcome": "Throwaway API with a path param and required flag passes add-api.sh end to end; go test ./... passes."
     }
   ]
 }

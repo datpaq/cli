@@ -35,6 +35,10 @@ Use `--yes --no-input` only after the target, arguments, and side effects are cl
 
 For install, auth, examples, and longer product guidance, read `README.md` and `SKILL.md`. This file intentionally stays small so repo-local agents get invariant local guidance without duplicating the generated docs.
 
+## Adding APIs
+
+New ProApi services are added as table-declared APIs, not by regenerating. Follow `docs/adding-apis.md` and finish with `scripts/api-sync/add-api.sh`.
+
 ## Local Customizations
 
 If you modify this CLI beyond what the generator produced, record each customization in a `.printing-press-patches.json` at this CLI's root (parallel to `.printing-press.json`) so the change isn't lost on the next regen and is visible to the next reader.
