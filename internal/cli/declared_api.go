@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -119,17 +120,13 @@ func newDeclaredEndpointCmd(flags *rootFlags, group string, ep APIEndpoint) *cob
 				path = strings.Replace(path, "{"+p.WireName()+"}", url.PathEscape(v), 1)
 			}
 
-			if isBodyMethod && stdinBody {
-				body, err := readStdinJSONBody()
-				if err != nil {
-					return err
-				}
-				return postMutation(cmd, flags, group, path, body)
-			}
-
+			useStdin := isBodyMethod && stdinBody
 			query := map[string]string{}
 			body := map[string]any{}
 			for _, p := range flagParams {
+				if useStdin && p.In == "body" {
+					continue // the stdin JSON replaces every body flag
+				}
 				if p.Required {
 					if err := requireFlag(cmd, flags, p.Flag); err != nil {
 						return err
@@ -139,6 +136,11 @@ func newDeclaredEndpointCmd(flags *rootFlags, group string, ep APIEndpoint) *cob
 					continue
 				}
 				raw := cmd.Flags().Lookup(p.Flag).Value.String()
+				if p.Type == "float" {
+					// pflag renders floats with %g (1e+06); APIs expect plain decimals.
+					f, _ := cmd.Flags().GetFloat64(p.Flag)
+					raw = strconv.FormatFloat(f, 'f', -1, 64)
+				}
 				if p.In == "body" {
 					v, err := declaredBodyValue(p, raw)
 					if err != nil {
@@ -148,6 +150,14 @@ func newDeclaredEndpointCmd(flags *rootFlags, group string, ep APIEndpoint) *cob
 				} else {
 					query[p.WireName()] = raw
 				}
+			}
+
+			if useStdin {
+				stdin, err := readStdinJSONBody()
+				if err != nil {
+					return err
+				}
+				body = stdin
 			}
 
 			switch ep.Method {
@@ -270,7 +280,7 @@ func bodyMutation(cmd *cobra.Command, flags *rootFlags, method, resource, path s
 	if err != nil {
 		return classifyAPIError(err, flags)
 	}
-	return printMutationResponse(cmd, flags, resource, path, statusCode, data)
+	return printMutationResponseAs(cmd, flags, strings.ToLower(method), resource, path, statusCode, data)
 }
 
 func deleteMutation(cmd *cobra.Command, flags *rootFlags, resource, path string, query map[string]string) error {
@@ -282,7 +292,7 @@ func deleteMutation(cmd *cobra.Command, flags *rootFlags, resource, path string,
 	if err != nil {
 		return classifyAPIError(err, flags)
 	}
-	return printMutationResponse(cmd, flags, resource, path, statusCode, data)
+	return printMutationResponseAs(cmd, flags, "delete", resource, path, statusCode, data)
 }
 
 // declaredWhichEntries feeds every declared endpoint into `datpaq which`.

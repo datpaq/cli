@@ -393,16 +393,18 @@
     },
     {
       "id": "declared-api-review-fixes",
-      "summary": "Dispatch PUT/PATCH with their verbs, let MCP file params read local paths, and emit spec examples with schema-typed scalars.",
-      "reason": "Codex review on the API sync stack found these gaps; MCP file params sent the path string as base64 and numeric spec examples were quoted strings.",
+      "summary": "Dispatch PUT/PATCH (incl. --stdin) with their verbs and report the real action, send float flags as plain decimals, normalize MCP numeric/path args, keep MCP file params base64-only, and type spec examples.",
+      "reason": "Codex and code-review passes found POST-only dispatch, 1e+06 float formatting, unescaped MCP path args, a local-file exfiltration risk in MCP file handling, and quoted numeric spec examples.",
       "files": [
         "internal/cli/declared_api.go",
+        "internal/cli/declared_api_spec_test.go",
+        "internal/cli/declared_api_test.go",
+        "internal/cli/mutation_helpers.go",
         "internal/mcp/declared_tools.go",
         "internal/mcp/declared_tools_test.go",
-        "internal/cli/declared_api_spec_test.go",
         "spec.yaml"
       ],
-      "validated_outcome": "MCP file-arg encoding test and go test ./... pass; spec.yaml has no number/integer params with string examples."
+      "validated_outcome": "Regression tests for float formatting, DELETE action, MCP arg normalization, and declared-name collisions pass; go test ./... passes."
     }
   ]
 }

@@ -6,8 +6,9 @@ package mcp
 
 import (
 	"context"
-	"encoding/base64"
-	"os"
+	"fmt"
+	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/datpaq/cli/internal/cli"
@@ -52,7 +53,7 @@ func declaredTool(group string, ep cli.APIEndpoint) mcplib.Tool {
 	for _, p := range ep.Params {
 		usage := p.Usage
 		if p.Type == "file" || p.Type == "files" {
-			usage += " (local path(s) readable by this server, or base64 content)"
+			usage += " (base64-encoded file content)"
 		}
 		popts := []mcplib.PropertyOption{mcplib.Description(usage)}
 		if p.Required || p.In == "path" {
@@ -93,59 +94,31 @@ func declaredHandler(ep cli.APIEndpoint) server.ToolHandlerFunc {
 	}
 	inner := makeAPIHandler(ep.Method, ep.Path, false, nil, bindings, nil)
 	return func(ctx context.Context, req mcplib.CallToolRequest) (*mcplib.CallToolResult, error) {
-		if err := encodeDeclaredFileArgs(ep, req.GetArguments()); err != nil {
-			return mcplib.NewToolResultError(err.Error()), nil
-		}
+		normalizeDeclaredArgs(ep, req.GetArguments())
 		return inner(ctx, req)
 	}
 }
 
-// encodeDeclaredFileArgs mirrors the CLI's --file handling: values naming a
-// readable local file are replaced with base64 content; other values are
-// assumed to already be base64 and pass through unchanged.
-func encodeDeclaredFileArgs(ep cli.APIEndpoint, args map[string]any) error {
-	encode := func(v any) (any, error) {
-		s, ok := v.(string)
-		if !ok {
-			return v, nil
-		}
-		if info, err := os.Stat(s); err != nil || info.IsDir() {
-			return v, nil
-		}
-		data, err := os.ReadFile(s)
-		if err != nil {
-			return nil, err
-		}
-		return base64.StdEncoding.EncodeToString(data), nil
-	}
+// normalizeDeclaredArgs fixes values that makeAPIHandler would format with
+// %v: JSON numbers bound to query/path become plain decimals (not 1e+06), and
+// path values are URL-escaped. File params are passed through as base64; the
+// MCP server never reads local paths on a caller's behalf.
+func normalizeDeclaredArgs(ep cli.APIEndpoint, args map[string]any) {
 	for _, p := range ep.Params {
 		name := declaredPublicName(p)
 		v, ok := args[name]
-		if !ok {
+		if !ok || p.In == "body" {
 			continue
 		}
-		switch p.Type {
-		case "file":
-			enc, err := encode(v)
-			if err != nil {
-				return err
-			}
-			args[name] = enc
-		case "files":
-			list, ok := v.([]any)
-			if !ok {
-				continue
-			}
-			for i, item := range list {
-				enc, err := encode(item)
-				if err != nil {
-					return err
-				}
-				list[i] = enc
-			}
+		s := fmt.Sprintf("%v", v)
+		if f, isNum := v.(float64); isNum {
+			s = strconv.FormatFloat(f, 'f', -1, 64)
 		}
+		if p.In == "path" {
+			s = url.PathEscape(s)
+		}
+		args[name] = s
 	}
-	return nil
 }
 
 // declaredContextResources lists declared groups for the MCP context tool.
