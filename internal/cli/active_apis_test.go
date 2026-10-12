@@ -19,7 +19,9 @@ func TestSupportedWebsiteActiveAPIsAreActive(t *testing.T) {
 		"define",
 		"dns",
 		"domain-lookup",
+		"economic-indicators",
 		"ev-charger",
+		"gdp",
 		"geocoding",
 		"helicopter",
 		"image-processing",
@@ -28,6 +30,7 @@ func TestSupportedWebsiteActiveAPIsAreActive(t *testing.T) {
 		"ip-intelligence",
 		"libor",
 		"mac-address",
+		"market-cap",
 		"mortgage-calculator",
 		"mx-lookup",
 		"pdf-generation",
@@ -35,7 +38,9 @@ func TestSupportedWebsiteActiveAPIsAreActive(t *testing.T) {
 		"public-holidays",
 		"qr-code",
 		"sample-data",
+		"sec-filings",
 		"spell-check",
+		"unemployment",
 		"us-states",
 		"text-language",
 		"thesaurus",
@@ -58,8 +63,8 @@ func TestSupportedWebsiteActiveAPIsAreActive(t *testing.T) {
 
 func TestActiveAPICountMatchesSupportedWebsiteActiveAPIs(t *testing.T) {
 	got := activeAPICount()
-	if got != 38 {
-		t.Errorf("activeAPICount() = %d, want 38 supported active APIs", got)
+	if got != 43 {
+		t.Errorf("activeAPICount() = %d, want 43 supported active APIs", got)
 	}
 }
 
