@@ -38,8 +38,6 @@ tags:
     description: Domain TLD classification, regional metadata, and DNS presence checks
   - name: EV Charger
     description: EV charging station search, station detail, and network/plug/level reference data
-  - name: Exchange Rates and Currency
-    description: Single and bulk currency conversion with live exchange rates
   - name: Geocoding
     description: Forward, reverse, and batch geocoding via OpenStreetMap Nominatim
   - name: Helicopter
@@ -86,6 +84,8 @@ tags:
     description: Headless scrape, batch, crawl, and site-map extraction
   - name: Web Screenshot
     description: Web page screenshot capture via headless browser
+  - name: Web Search
+    description: Web search for a single query or a batch of up to 10 queries
   - name: WHOIS
     description: Domain WHOIS registration data lookup
   - name: Working Days
@@ -4590,170 +4590,6 @@ paths:
               station_ids:
                 - "12345"
                 - "67890"
-  /exchange-rates-and-currency/api/exchange:
-    get:
-      tags:
-        - Exchange Rates and Currency
-      operationId: exchangeRatesConvert
-      summary: Convert an amount between two currencies
-      description: Requires base, target, and amount. Returns the rate, converted amount, and timestamp.
-      responses:
-        "200":
-          description: Converted amount and rate
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GenericSuccess"
-              example:
-                success: true
-                data:
-                  base: USD
-                  target: EUR
-                  amount: 100
-                  rate: 0.92
-                  converted: 92
-                  timestamp: "2026-08-20T12:00:00.000Z"
-                metadata:
-                  correlationId: abc123-def456
-                  timestamp: "2026-08-20T12:00:00.000Z"
-                  processingTime: 16ms
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "429":
-          $ref: "#/components/responses/RateLimited"
-        default:
-          $ref: "#/components/responses/ServiceUnavailable"
-      parameters:
-        - name: base
-          in: query
-          required: true
-          description: Source currency code
-          schema:
-            type: string
-            example: USD
-        - name: target
-          in: query
-          required: true
-          description: Target currency code
-          schema:
-            type: string
-            example: EUR
-        - name: amount
-          in: query
-          required: true
-          description: Amount to convert
-          schema:
-            type: number
-            example: 100
-  /exchange-rates-and-currency/api/bulk-exchange:
-    get:
-      tags:
-        - Exchange Rates and Currency
-      operationId: exchangeRatesBulkGet
-      summary: Bulk conversion (GET)
-      description: Pass conversions as a JSON array string, up to 100 pairs.
-      responses:
-        "200":
-          description: Bulk conversion results
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GenericSuccess"
-              example:
-                success: true
-                data:
-                  results:
-                    - base: USD
-                      target: EUR
-                      amount: 100
-                      rate: 0.92
-                      converted: 92
-                metadata:
-                  correlationId: abc123-def456
-                  timestamp: "2026-08-20T12:00:00.000Z"
-                  processingTime: 21ms
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "429":
-          $ref: "#/components/responses/RateLimited"
-        default:
-          $ref: "#/components/responses/ServiceUnavailable"
-      parameters:
-        - name: conversions
-          in: query
-          required: true
-          description: JSON array string of { "base", "target", "amount" } objects
-          schema:
-            type: string
-            example: "[{\"base\":\"USD\",\"target\":\"EUR\",\"amount\":100}]"
-    post:
-      tags:
-        - Exchange Rates and Currency
-      operationId: exchangeRatesBulkPost
-      summary: Bulk conversion (POST)
-      description: JSON body conversions array, up to 100 pairs.
-      responses:
-        "200":
-          description: Bulk conversion results
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GenericSuccess"
-              example:
-                success: true
-                data:
-                  results:
-                    - base: USD
-                      target: EUR
-                      amount: 100
-                      rate: 0.92
-                      converted: 92
-                metadata:
-                  correlationId: abc123-def456
-                  timestamp: "2026-08-20T12:00:00.000Z"
-                  processingTime: 21ms
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "429":
-          $ref: "#/components/responses/RateLimited"
-        default:
-          $ref: "#/components/responses/ServiceUnavailable"
-      requestBody:
-        required: true
-        description: Conversion pairs
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - conversions
-              properties:
-                conversions:
-                  type: array
-                  maxItems: 100
-                  items:
-                    type: object
-                    properties:
-                      base:
-                        type: string
-                        example: USD
-                      target:
-                        type: string
-                        example: EUR
-                      amount:
-                        type: number
-                        example: 100
-            example:
-              conversions:
-                - base: USD
-                  target: EUR
-                  amount: 100
   /geocoding/forward:
     get:
       tags:
@@ -6054,6 +5890,84 @@ paths:
           schema:
             type: integer
             example: 7
+  /web-search/search:
+    get:
+      tags:
+        - Web Search
+      operationId: webSearchSearch
+      summary: Search the web for a single query
+      description: Returns instant answers, related topics, and results for one query.
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query (1-256 characters)
+          schema:
+            type: string
+            example: datpaq api
+        - name: limit
+          in: query
+          required: false
+          description: Max related topics and results per section (1-10, default 10)
+          schema:
+            type: integer
+            example: 5
+    post:
+      tags:
+        - Web Search
+      operationId: webSearchBatch
+      summary: Batch web search for up to 10 queries
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - queries
+              properties:
+                queries:
+                  type: array
+                  minItems: 1
+                  maxItems: 10
+                  items:
+                    type: string
+                  example:
+                    - weather nyc
+                    - geocoding api
+                limit:
+                  type: integer
+                  example: 5
+      responses:
+        "200":
+          description: Batch search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
 components:
   securitySchemes:
     ApiKeyHeader:
