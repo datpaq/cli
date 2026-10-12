@@ -249,6 +249,23 @@
         "spec.yaml"
       ],
       "validated_outcome": "go test ./internal/cli ./internal/mcp passes; datpaq api --agent lists 35 interfaces including web-search, excluding exchange-rates-and-currency."
+    },
+    {
+      "id": "declared-api-table-core",
+      "summary": "Add a declarative endpoint table that builds CLI commands, which entries, and sample wire names from one definition; first consumer is interest-rate.",
+      "reason": "28 staging-catalog APIs (~100 endpoints) are absent from the generated spec; one table avoids repeating flag/request boilerplate per endpoint.",
+      "files": [
+        "internal/cli/declared_api.go",
+        "internal/cli/declared_api_test.go",
+        "internal/cli/root.go",
+        "internal/cli/which.go",
+        "internal/cli/sample.go",
+        "internal/cli/interest-rate.go",
+        "internal/cli/active-apis.json",
+        "internal/cli/active_apis_test.go",
+        "spec.yaml"
+      ],
+      "validated_outcome": "Table-driven tests assert method, path, and wire params for every declared endpoint plus required-flag enforcement; go test ./... passes."
     }
   ]
 }
