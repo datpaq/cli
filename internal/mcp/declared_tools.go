@@ -5,6 +5,9 @@
 package mcp
 
 import (
+	"context"
+	"encoding/base64"
+	"os"
 	"strings"
 
 	"github.com/datpaq/cli/internal/cli"
@@ -47,7 +50,11 @@ func declaredTool(group string, ep cli.APIEndpoint) mcplib.Tool {
 
 	opts := []mcplib.ToolOption{mcplib.WithDescription(desc)}
 	for _, p := range ep.Params {
-		popts := []mcplib.PropertyOption{mcplib.Description(p.Usage)}
+		usage := p.Usage
+		if p.Type == "file" || p.Type == "files" {
+			usage += " (local path(s) readable by this server, or base64 content)"
+		}
+		popts := []mcplib.PropertyOption{mcplib.Description(usage)}
 		if p.Required || p.In == "path" {
 			popts = append(popts, mcplib.Required())
 		}
@@ -84,7 +91,61 @@ func declaredHandler(ep cli.APIEndpoint) server.ToolHandlerFunc {
 		}
 		bindings = append(bindings, mcpParamBinding{PublicName: declaredPublicName(p), WireName: p.WireName(), Location: loc})
 	}
-	return makeAPIHandler(ep.Method, ep.Path, false, nil, bindings, nil)
+	inner := makeAPIHandler(ep.Method, ep.Path, false, nil, bindings, nil)
+	return func(ctx context.Context, req mcplib.CallToolRequest) (*mcplib.CallToolResult, error) {
+		if err := encodeDeclaredFileArgs(ep, req.GetArguments()); err != nil {
+			return mcplib.NewToolResultError(err.Error()), nil
+		}
+		return inner(ctx, req)
+	}
+}
+
+// encodeDeclaredFileArgs mirrors the CLI's --file handling: values naming a
+// readable local file are replaced with base64 content; other values are
+// assumed to already be base64 and pass through unchanged.
+func encodeDeclaredFileArgs(ep cli.APIEndpoint, args map[string]any) error {
+	encode := func(v any) (any, error) {
+		s, ok := v.(string)
+		if !ok {
+			return v, nil
+		}
+		if info, err := os.Stat(s); err != nil || info.IsDir() {
+			return v, nil
+		}
+		data, err := os.ReadFile(s)
+		if err != nil {
+			return nil, err
+		}
+		return base64.StdEncoding.EncodeToString(data), nil
+	}
+	for _, p := range ep.Params {
+		name := declaredPublicName(p)
+		v, ok := args[name]
+		if !ok {
+			continue
+		}
+		switch p.Type {
+		case "file":
+			enc, err := encode(v)
+			if err != nil {
+				return err
+			}
+			args[name] = enc
+		case "files":
+			list, ok := v.([]any)
+			if !ok {
+				continue
+			}
+			for i, item := range list {
+				enc, err := encode(item)
+				if err != nil {
+					return err
+				}
+				list[i] = enc
+			}
+		}
+	}
+	return nil
 }
 
 // declaredContextResources lists declared groups for the MCP context tool.

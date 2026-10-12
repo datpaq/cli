@@ -156,7 +156,7 @@ func newDeclaredEndpointCmd(flags *rootFlags, group string, ep APIEndpoint) *cob
 			case "DELETE":
 				return deleteMutation(cmd, flags, group, path, query)
 			default:
-				return postMutationWithQuery(cmd, flags, group, path, query, body)
+				return bodyMutation(cmd, flags, ep.Method, group, path, query, body)
 			}
 		},
 	}
@@ -254,12 +254,19 @@ func shellQuoteExample(v string) string {
 	return v
 }
 
-func postMutationWithQuery(cmd *cobra.Command, flags *rootFlags, resource, path string, query map[string]string, body map[string]any) error {
+func bodyMutation(cmd *cobra.Command, flags *rootFlags, method, resource, path string, query map[string]string, body map[string]any) error {
 	c, err := flags.newClient()
 	if err != nil {
 		return err
 	}
-	data, statusCode, err := c.PostWithParams(path, query, body)
+	send := c.PostWithParams
+	switch method {
+	case "PUT":
+		send = c.PutWithParams
+	case "PATCH":
+		send = c.PatchWithParams
+	}
+	data, statusCode, err := send(path, query, body)
 	if err != nil {
 		return classifyAPIError(err, flags)
 	}

@@ -380,6 +380,29 @@
         "AGENTS.md"
       ],
       "validated_outcome": "Throwaway API with a path param and required flag passes add-api.sh end to end; go test ./... passes."
+    },
+    {
+      "id": "skill-readme-63-api-refresh",
+      "summary": "Regenerate the SKILL.md command reference from the live command tree (63 active APIs) and replace a README example that used deactivated email-validation.",
+      "reason": "Generated docs listed deactivated APIs and omitted 31 active ones; regen would restore stale content, so the refresh is recorded here.",
+      "files": [
+        "SKILL.md",
+        "README.md"
+      ],
+      "validated_outcome": "SKILL.md lists exactly the interfaces from datpaq api --agent."
+    },
+    {
+      "id": "declared-api-review-fixes",
+      "summary": "Dispatch PUT/PATCH with their verbs, let MCP file params read local paths, and emit spec examples with schema-typed scalars.",
+      "reason": "Codex review on the API sync stack found these gaps; MCP file params sent the path string as base64 and numeric spec examples were quoted strings.",
+      "files": [
+        "internal/cli/declared_api.go",
+        "internal/mcp/declared_tools.go",
+        "internal/mcp/declared_tools_test.go",
+        "internal/cli/declared_api_spec_test.go",
+        "spec.yaml"
+      ],
+      "validated_outcome": "MCP file-arg encoding test and go test ./... pass; spec.yaml has no number/integer params with string examples."
     }
   ]
 }

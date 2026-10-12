@@ -83,7 +83,11 @@ func writeSpecOperation(b *strings.Builder, group string, ep APIEndpoint) {
 			fmt.Fprintf(b, "        - name: %s\n          in: %s\n          required: %t\n", p.WireName(), in, p.Required || in == "path")
 			fmt.Fprintf(b, "          description: %s\n          schema:\n            type: %s\n", specYAMLString(p.Usage), specSchemaType(p))
 			if p.Example != "" {
-				fmt.Fprintf(b, "            example: %s\n", specYAMLString(p.Example))
+				example := specYAMLString(p.Example)
+				if t := specSchemaType(p); t == "number" || t == "integer" || t == "boolean" {
+					example = p.Example // scalar examples must match their schema type
+				}
+				fmt.Fprintf(b, "            example: %s\n", example)
 			}
 		}
 	}
