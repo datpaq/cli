@@ -42,6 +42,10 @@ tags:
     description: "Web page snapshots and change diffs against a previous snapshot"
   - name: DNS Lookup
     description: Forward and reverse DNS resolution for domains and IP addresses
+  - name: Document Convert
+    description: "Convert office documents, PDF, and text formats"
+  - name: Document Generation
+    description: "Generate business documents (invoices, letters, forms) as PDF, DOCX, or HTML"
   - name: Domain Lookup
     description: Domain TLD classification, regional metadata, and DNS presence checks
   - name: Economic Indicators
@@ -82,8 +86,12 @@ tags:
     description: "Mortgage payment, refinance break-even, and current mortgage rates"
   - name: MX Lookup
     description: Mail exchange record lookup with optional SPF and SMTP checks
+  - name: OCR
+    description: "Extract text from PDFs and images, with optional OCR"
   - name: PDF Generation
     description: SSRF-safe PDF rendering from a public URL or sanitized HTML
+  - name: PDF Toolkit
+    description: "Merge, split, extract, rotate, watermark, compress, encrypt, and inspect PDFs"
   - name: Profanity
     description: Content moderation and profanity detection
   - name: Public Holidays
@@ -8969,6 +8977,484 @@ paths:
         - Translate
       operationId: translateLanguages
       summary: "List supported languages"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /document-convert/formats:
+    get:
+      tags:
+        - Document Convert
+      operationId: documentConvertFormats
+      summary: "List supported conversion pairs"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /document-convert/convert:
+    post:
+      tags:
+        - Document Convert
+      operationId: documentConvertConvert
+      summary: "Convert one document from a local file or URL"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sourceFormat
+                - targetFormat
+              properties:
+                sourceFormat:
+                  type: string
+                  description: "Source format"
+                targetFormat:
+                  type: string
+                  description: "Target format"
+                fileBase64:
+                  type: string
+                  description: "Local file to upload (or pass --file-url)"
+                fileUrl:
+                  type: string
+                  description: "Public HTTP(S) file URL (or pass --file)"
+                filename:
+                  type: string
+                  description: "Original filename"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /document-generation/documents:
+    get:
+      tags:
+        - Document Generation
+      operationId: documentGenerationDocuments
+      summary: "List available document types"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /document-generation/openapi.json:
+    get:
+      tags:
+        - Document Generation
+      operationId: documentGenerationOpenapi
+      summary: "Get the service OpenAPI document"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /document-generation/{documentType}/schema:
+    get:
+      tags:
+        - Document Generation
+      operationId: documentGenerationSchema
+      summary: "Get a document type's field schema"
+      parameters:
+        - name: documentType
+          in: path
+          required: true
+          description: "Document type slug (see documents)"
+          schema:
+            type: string
+            example: "invoice"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /document-generation/{documentType}/json-schema:
+    get:
+      tags:
+        - Document Generation
+      operationId: documentGenerationJsonSchema
+      summary: "Get a document type's JSON Schema"
+      parameters:
+        - name: documentType
+          in: path
+          required: true
+          description: "Document type slug (see documents)"
+          schema:
+            type: string
+            example: "invoice"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /document-generation/{documentType}/example:
+    get:
+      tags:
+        - Document Generation
+      operationId: documentGenerationExample
+      summary: "Get example data for a document type"
+      parameters:
+        - name: documentType
+          in: path
+          required: true
+          description: "Document type slug (see documents)"
+          schema:
+            type: string
+            example: "invoice"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /document-generation/{documentType}/render:
+    get:
+      tags:
+        - Document Generation
+      operationId: documentGenerationRenderBlank
+      summary: "Render a blank document as HTML"
+      parameters:
+        - name: documentType
+          in: path
+          required: true
+          description: "Document type slug (see documents)"
+          schema:
+            type: string
+            example: "invoice"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+    post:
+      tags:
+        - Document Generation
+      operationId: documentGenerationRender
+      summary: "Render a document with data as HTML"
+      parameters:
+        - name: documentType
+          in: path
+          required: true
+          description: "Document type slug (see documents)"
+          schema:
+            type: string
+            example: "invoice"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  description: "filled (default) or blank"
+                data:
+                  type: object
+                  description: "Document data JSON (see the type's schema/example)"
+                branding:
+                  type: object
+                  description: "Branding JSON (organizationName, primaryColor, footerText, ...)"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /document-generation/{documentType}/generate:
+    post:
+      tags:
+        - Document Generation
+      operationId: documentGenerationGenerate
+      summary: "Generate a PDF or DOCX document"
+      parameters:
+        - name: documentType
+          in: path
+          required: true
+          description: "Document type slug (see documents)"
+          schema:
+            type: string
+            example: "invoice"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  description: "filled (default) or blank"
+                data:
+                  type: object
+                  description: "Document data JSON (see the type's schema/example)"
+                branding:
+                  type: object
+                  description: "Branding JSON (organizationName, primaryColor, footerText, ...)"
+                output:
+                  type: object
+                  description: "Output JSON: {\"type\":\"pdf|docx\",\"format\":\"Letter\",\"responseType\":\"base64|binary\",\"landscape\":false}"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /document-generation/batch:
+    post:
+      tags:
+        - Document Generation
+      operationId: documentGenerationBatch
+      summary: "Generate up to 5 documents as base64"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - requests
+              properties:
+                requests:
+                  type: array
+                  description: "JSON array of {\"documentType\",\"data\",\"output\"} requests (1-5)"
+                  items: {}
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /ocr/parse:
+    post:
+      tags:
+        - OCR
+      operationId: ocrParse
+      summary: "Extract text from a local file or URL"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileBase64:
+                  type: string
+                  description: "Local PDF or image (or pass --url)"
+                url:
+                  type: string
+                  description: "Public HTTP(S) file URL (or pass --file)"
+                filename:
+                  type: string
+                  description: "Original filename"
+                ocr:
+                  type: boolean
+                  description: "Force OCR on images and scanned pages (default false)"
+                language:
+                  type: string
+                  description: "OCR language code (default eng)"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /pdf-toolkit:
+    get:
+      tags:
+        - PDF Toolkit
+      operationId: pdfToolkitCatalog
+      summary: "List supported operations and limits"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+    post:
+      tags:
+        - PDF Toolkit
+      operationId: pdfToolkitRun
+      summary: "Run a PDF operation on local files"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - operation
+              properties:
+                operation:
+                  type: string
+                  description: "merge, split, extract, rotate, watermark, compress, encrypt, or inspect"
+                file:
+                  type: string
+                  description: "Local PDF for non-merge operations"
+                files:
+                  type: array
+                  description: "Comma-separated local PDFs for merge (2-20)"
+                  items: {}
+                pages:
+                  type: string
+                  description: "Pages: all or ascending ranges"
+                angle:
+                  type: number
+                  description: "Rotate: multiple of 90; watermark: any angle"
+                text:
+                  type: string
+                  description: "Watermark text (1-200 characters)"
+                opacity:
+                  type: number
+                  description: "Watermark opacity 0-1 (default 0.6)"
+                color:
+                  type: string
+                  description: "Watermark RGB as three numbers 0-1"
+                fontSize:
+                  type: number
+                  description: "Watermark font size (8-300)"
+                password:
+                  type: string
+                  description: "Encrypt: user password (8+ characters)"
+                owner_password:
+                  type: string
+                  description: "Encrypt: owner password"
       responses:
         "200":
           description: Success

@@ -5,26 +5,41 @@
 package cli
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
 
-func declaredEndpointArgs(group string, ep APIEndpoint) []string {
+// declaredEndpointArgs builds a full invocation from each param's Example.
+// File-typed params get a temp file whose content is the Example.
+func declaredEndpointArgs(t *testing.T, group string, ep APIEndpoint) []string {
 	args := []string{group, ep.Name}
 	for _, p := range ep.Params {
 		if p.In == "path" {
 			args = append(args, p.Example)
 		}
 	}
-	for _, p := range ep.Params {
-		if p.In == "path" {
-			continue
+	tempFile := func(name, content string) string {
+		path := filepath.Join(t.TempDir(), name)
+		if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+			t.Fatal(err)
 		}
-		if p.Type == "bool" {
+		return path
+	}
+	for _, p := range ep.Params {
+		switch {
+		case p.In == "path":
+		case p.Type == "bool":
 			args = append(args, "--"+p.Flag+"="+p.Example)
-		} else {
+		case p.Type == "file":
+			args = append(args, "--"+p.Flag, tempFile("a", p.Example))
+		case p.Type == "files":
+			args = append(args, "--"+p.Flag, tempFile("a", p.Example)+","+tempFile("b", p.Example))
+		default:
 			args = append(args, "--"+p.Flag, p.Example)
 		}
 	}
@@ -35,7 +50,7 @@ func TestDeclaredEndpointsBuildRequests(t *testing.T) {
 	for _, g := range DeclaredAPIGroups() {
 		for _, ep := range g.Endpoints {
 			t.Run(g.Name+"."+ep.Name, func(t *testing.T) {
-				stdout, stderr, requests, err := runAPICommand(t, `{"success":true}`, declaredEndpointArgs(g.Name, ep)...)
+				stdout, stderr, requests, err := runAPICommand(t, `{"success":true}`, declaredEndpointArgs(t, g.Name, ep)...)
 				if err != nil {
 					t.Fatalf("Execute: %v\nstdout=%s\nstderr=%s", err, stdout, stderr)
 				}
@@ -67,8 +82,12 @@ func TestDeclaredEndpointsBuildRequests(t *testing.T) {
 					switch p.In {
 					case "path":
 					case "body":
-						if _, ok := body[p.WireName()]; !ok {
+						v, ok := body[p.WireName()]
+						if !ok {
 							t.Errorf("body missing %q: %s", p.WireName(), req.Body)
+						}
+						if p.Type == "file" && v != base64.StdEncoding.EncodeToString([]byte(p.Example)) {
+							t.Errorf("body %q = %v, want base64 file content", p.WireName(), v)
 						}
 					default:
 						if !query.Has(p.WireName()) {

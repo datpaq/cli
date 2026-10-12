@@ -7,9 +7,11 @@
 package cli
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -20,7 +22,7 @@ type APIParam struct {
 	Flag     string // CLI flag name (kebab-case); path params become positionals
 	Wire     string // API wire name; defaults to Flag
 	In       string // "query", "body", or "path"
-	Type     string // "string", "int", "float", "bool", "array", or "object"
+	Type     string // "string", "int", "float", "bool", "array", "object", "file", or "files"
 	Usage    string
 	Example  string // sample value used in --help examples and tests
 	Required bool
@@ -201,9 +203,33 @@ func declaredBodyValue(p APIParam, raw string) (any, error) {
 			return nil, err
 		}
 		return v, nil
+	case "file":
+		return readFileBase64(raw)
+	case "files":
+		var out []string
+		for _, path := range strings.Split(raw, ",") {
+			if path = strings.TrimSpace(path); path == "" {
+				continue
+			}
+			enc, err := readFileBase64(path)
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, enc)
+		}
+		return out, nil
 	default:
 		return raw, nil
 	}
+}
+
+// readFileBase64 loads a local file for APIs that take base64 file content.
+func readFileBase64(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(data), nil
 }
 
 // declaredExample lists path args and required flags only, matching the

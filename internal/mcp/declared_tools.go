@@ -57,7 +57,7 @@ func declaredTool(group string, ep cli.APIEndpoint) mcplib.Tool {
 			opts = append(opts, mcplib.WithNumber(name, popts...))
 		case "bool":
 			opts = append(opts, mcplib.WithBoolean(name, popts...))
-		case "array":
+		case "array", "files":
 			opts = append(opts, mcplib.WithArray(name, popts...))
 		case "object":
 			opts = append(opts, mcplib.WithObject(name, popts...))
