@@ -51,6 +51,8 @@ func specSchemaType(p APIParam) string {
 		return "boolean"
 	case "array", "object":
 		return p.Type
+	case "files":
+		return "array"
 	default:
 		return "string"
 	}
@@ -102,7 +104,7 @@ func writeSpecOperation(b *strings.Builder, group string, ep APIEndpoint) {
 		b.WriteString("              properties:\n")
 		for _, p := range body {
 			fmt.Fprintf(b, "                %s:\n                  type: %s\n                  description: %s\n", p.WireName(), specSchemaType(p), specYAMLString(p.Usage))
-			if p.Type == "array" {
+			if p.Type == "array" || p.Type == "files" {
 				b.WriteString("                  items: {}\n")
 			}
 		}

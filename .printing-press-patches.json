@@ -332,6 +332,25 @@
         "internal/cli/markdown-convert.go"
       ],
       "validated_outcome": "go test ./... passes: table-driven request, required-flag, MCP-param, and spec.yaml parity tests cover every new endpoint."
+    },
+    {
+      "id": "staging-catalog-document-apis",
+      "summary": "Add document-convert, document-generation, pdf-toolkit, and ocr; add file/files param types that base64-encode local files.",
+      "reason": "These services are in the staging 63-API catalog and take base64 file content, which users cannot reasonably paste on the command line.",
+      "files": [
+        "internal/cli/active-apis.json",
+        "internal/cli/active_apis_test.go",
+        "spec.yaml",
+        "internal/cli/document-convert.go",
+        "internal/cli/document-generation.go",
+        "internal/cli/pdf-toolkit.go",
+        "internal/cli/ocr.go",
+        "internal/cli/declared_api.go",
+        "internal/cli/declared_api_test.go",
+        "internal/cli/declared_api_spec_test.go",
+        "internal/mcp/declared_tools.go"
+      ],
+      "validated_outcome": "go test ./... passes: table-driven request, required-flag, MCP-param, and spec.yaml parity tests cover every new endpoint."
     }
   ]
 }
