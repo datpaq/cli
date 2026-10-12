@@ -102,10 +102,10 @@ Credentials persist to `~/.config/datpaq/config.toml` (mode `0600`, never commit
 $ datpaq aircraft lookup-by-tail --tail N12345
 ```
 
-**Validate a batch of email addresses from a file:**
+**Validate a batch of IBANs and keep the invalid ones:**
 
 ```bash
-$ datpaq email-validation validate-batch --emails-file ./list.txt --json | jq '.[] | select(.deliverable == false)'
+$ datpaq iban validate-batch --ibans DE89370400440532013000,GB82WEST12345698765432 --json | jq '.data.results[] | select(.valid == false)'
 ```
 
 **Resize an image inline:**
