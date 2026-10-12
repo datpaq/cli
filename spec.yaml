@@ -44,6 +44,8 @@ tags:
     description: FAA rotorcraft lookup by tail, ICAO hex, serial, manufacturer, and model
   - name: Image Processing
     description: Image resize, compress, convert, crop, and pipeline operations
+  - name: Interest Rate
+    description: "Current benchmark interest rates and the Treasury yield curve"
   - name: IP Geolocation
     description: Geographic location data for IPv4 and IPv6 addresses
   - name: IP Intelligence
@@ -5956,6 +5958,48 @@ paths:
       responses:
         "200":
           description: Batch search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /interest-rate/current:
+    get:
+      tags:
+        - Interest Rate
+      operationId: interestRateCurrent
+      summary: "Get current benchmark rates by category"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /interest-rate/yield-curve:
+    get:
+      tags:
+        - Interest Rate
+      operationId: interestRateYieldCurve
+      summary: "Get the ordered Treasury yield curve"
+      responses:
+        "200":
+          description: Success
           content:
             application/json:
               schema:
