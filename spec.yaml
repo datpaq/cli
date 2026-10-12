@@ -5,7 +5,7 @@ info:
     Multi-service API platform covering the live Datpaq catalog: geocoding, EV charging, weather, aviation, holidays,
     QR/PDF generation, enrichment, and utilities. All endpoints require authentication via API key passed as an
     x-api-key header or api_key query parameter.
-  version: 1.0.2
+  version: 1.1.0
   contact:
     name: Datpaq Support
     url: https://datpaq.com
