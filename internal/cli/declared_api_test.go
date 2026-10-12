@@ -109,7 +109,13 @@ func TestDeclaredRequiredFlagsAreEnforced(t *testing.T) {
 				if !p.Required || p.In == "path" {
 					continue
 				}
-				_, _, requests, err := runAPICommand(t, `{"success":true}`, g.Name, ep.Name, "--agent")
+				args := []string{g.Name, ep.Name}
+				for _, pp := range ep.Params {
+					if pp.In == "path" {
+						args = append(args, pp.Example)
+					}
+				}
+				_, _, requests, err := runAPICommand(t, `{"success":true}`, append(args, "--agent")...)
 				if err == nil || !strings.Contains(err.Error(), `required flag "`) {
 					t.Errorf("%s %s without required flags: err = %v, want required flag error", g.Name, ep.Name, err)
 				}
