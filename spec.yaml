@@ -50,8 +50,12 @@ tags:
     description: Geographic location data for IPv4 and IPv6 addresses
   - name: IP Intelligence
     description: Threat intelligence and risk scoring for IP addresses
+  - name: LIBOR
+    description: "SOFR-first benchmark rates with archival LIBOR history and tenor spreads"
   - name: MAC Address
     description: MAC address vendor identification from IEEE OUI registry data
+  - name: Mortgage Calculator
+    description: "Mortgage payment, refinance break-even, and current mortgage rates"
   - name: MX Lookup
     description: Mail exchange record lookup with optional SPF and SMTP checks
   - name: PDF Generation
@@ -5997,6 +6001,417 @@ paths:
         - Interest Rate
       operationId: interestRateYieldCurve
       summary: "Get the ordered Treasury yield curve"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /libor:
+    get:
+      tags:
+        - LIBOR
+      operationId: liborLatest
+      summary: "Get the latest benchmark rate"
+      parameters:
+        - name: benchmark
+          in: query
+          required: false
+          description: "Benchmark: sofr (default) or libor"
+          schema:
+            type: string
+            example: "sofr"
+        - name: tenor
+          in: query
+          required: false
+          description: "Tenor: 1m, 3m, 6m, or 12m"
+          schema:
+            type: string
+            example: "3m"
+        - name: period
+          in: query
+          required: false
+          description: "Window: latest, 1y, 5y, max, or available"
+          schema:
+            type: string
+            example: "available"
+        - name: source
+          in: query
+          required: false
+          description: "Data source: auto, fred, or snapshot"
+          schema:
+            type: string
+            example: "auto"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /libor/history:
+    get:
+      tags:
+        - LIBOR
+      operationId: liborHistory
+      summary: "Get benchmark rate history"
+      parameters:
+        - name: benchmark
+          in: query
+          required: false
+          description: "Benchmark: sofr (default) or libor"
+          schema:
+            type: string
+            example: "sofr"
+        - name: tenor
+          in: query
+          required: false
+          description: "Tenor: 1m, 3m, 6m, or 12m"
+          schema:
+            type: string
+            example: "3m"
+        - name: period
+          in: query
+          required: false
+          description: "Window: latest, 1y, 5y, max, or available"
+          schema:
+            type: string
+            example: "available"
+        - name: source
+          in: query
+          required: false
+          description: "Data source: auto, fred, or snapshot"
+          schema:
+            type: string
+            example: "auto"
+        - name: startDate
+          in: query
+          required: false
+          description: "Inclusive lower bound (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2026-02-01"
+        - name: endDate
+          in: query
+          required: false
+          description: "Inclusive upper bound (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2026-07-01"
+        - name: sort
+          in: query
+          required: false
+          description: "Sort order: asc (default) or desc"
+          schema:
+            type: string
+            example: "desc"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /libor/spread:
+    get:
+      tags:
+        - LIBOR
+      operationId: liborSpread
+      summary: "Get the spread between two tenors"
+      parameters:
+        - name: benchmark
+          in: query
+          required: false
+          description: "Benchmark: sofr (default) or libor"
+          schema:
+            type: string
+            example: "sofr"
+        - name: period
+          in: query
+          required: false
+          description: "Window: latest, 1y, 5y, max, or available"
+          schema:
+            type: string
+            example: "available"
+        - name: source
+          in: query
+          required: false
+          description: "Data source: auto, fred, or snapshot"
+          schema:
+            type: string
+            example: "auto"
+        - name: startDate
+          in: query
+          required: false
+          description: "Inclusive lower bound (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2026-02-01"
+        - name: endDate
+          in: query
+          required: false
+          description: "Inclusive upper bound (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2026-07-01"
+        - name: sort
+          in: query
+          required: false
+          description: "Sort order: asc (default) or desc"
+          schema:
+            type: string
+            example: "desc"
+        - name: shortTenor
+          in: query
+          required: false
+          description: "Short-leg tenor: 1m, 3m, 6m, or 12m"
+          schema:
+            type: string
+            example: "3m"
+        - name: longTenor
+          in: query
+          required: false
+          description: "Long-leg tenor: 1m, 3m, 6m, or 12m"
+          schema:
+            type: string
+            example: "12m"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /libor/catalog:
+    get:
+      tags:
+        - LIBOR
+      operationId: liborCatalog
+      summary: "List supported benchmarks, tenors, and coverage"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /mortgage-calculator/payment:
+    get:
+      tags:
+        - Mortgage Calculator
+      operationId: mortgageCalculatorPayment
+      summary: "Calculate monthly payment, total interest, and optional amortization"
+      parameters:
+        - name: interest_rate
+          in: query
+          required: true
+          description: "Annual percentage rate"
+          schema:
+            type: number
+            example: "6.5"
+        - name: loan_amount
+          in: query
+          required: false
+          description: "Loan principal (or pass --home-value and --downpayment)"
+          schema:
+            type: number
+            example: "350000"
+        - name: home_value
+          in: query
+          required: false
+          description: "Home value, used with --downpayment"
+          schema:
+            type: number
+            example: "400000"
+        - name: downpayment
+          in: query
+          required: false
+          description: "Down payment, less than --home-value"
+          schema:
+            type: number
+            example: "50000"
+        - name: duration_years
+          in: query
+          required: false
+          description: "Loan term in years (default 30)"
+          schema:
+            type: number
+            example: "30"
+        - name: monthly_extra_payment
+          in: query
+          required: false
+          description: "Additional monthly principal payment"
+          schema:
+            type: number
+            example: "200"
+        - name: monthly_hoa
+          in: query
+          required: false
+          description: "Monthly HOA amount"
+          schema:
+            type: number
+            example: "150"
+        - name: annual_property_tax
+          in: query
+          required: false
+          description: "Annual property tax"
+          schema:
+            type: number
+            example: "4800"
+        - name: annual_home_insurance
+          in: query
+          required: false
+          description: "Annual home insurance"
+          schema:
+            type: number
+            example: "1200"
+        - name: includeSchedule
+          in: query
+          required: false
+          description: "Include an amortization schedule"
+          schema:
+            type: boolean
+            example: "true"
+        - name: start_date
+          in: query
+          required: false
+          description: "Schedule start date (YYYY-MM-DD)"
+          schema:
+            type: string
+            example: "2026-01-01"
+        - name: annual_appreciation_rate
+          in: query
+          required: false
+          description: "Annual home appreciation percentage (-100 to 100)"
+          schema:
+            type: number
+            example: "3"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /mortgage-calculator/refinance:
+    get:
+      tags:
+        - Mortgage Calculator
+      operationId: mortgageCalculatorRefinance
+      summary: "Simulate a refinance and its break-even point"
+      parameters:
+        - name: current_loan_amount
+          in: query
+          required: true
+          description: "Current loan balance"
+          schema:
+            type: number
+            example: "280000"
+        - name: current_interest_rate
+          in: query
+          required: true
+          description: "Current annual rate"
+          schema:
+            type: number
+            example: "7"
+        - name: current_remaining_years
+          in: query
+          required: true
+          description: "Current remaining term in years"
+          schema:
+            type: number
+            example: "25"
+        - name: new_interest_rate
+          in: query
+          required: true
+          description: "Proposed annual rate"
+          schema:
+            type: number
+            example: "5.75"
+        - name: new_duration_years
+          in: query
+          required: true
+          description: "Proposed term in years"
+          schema:
+            type: number
+            example: "25"
+        - name: refinance_cost
+          in: query
+          required: false
+          description: "Refinance closing cost"
+          schema:
+            type: number
+            example: "5000"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /mortgage-calculator/current-rates:
+    get:
+      tags:
+        - Mortgage Calculator
+      operationId: mortgageCalculatorCurrentRates
+      summary: "Get weekly average mortgage rates from FRED"
       responses:
         "200":
           description: Success
