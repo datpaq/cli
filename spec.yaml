@@ -22,6 +22,8 @@ security:
 tags:
   - name: Aircraft
     description: FAA aircraft registration lookup by tail, ICAO hex, and type code
+  - name: Breach Check
+    description: "Email breach exposure, password k-anonymity checks, and breach catalog"
   - name: Calendar
     description: Month, day, and range calendars with optional public-holiday overlays
   - name: Color Convert
@@ -74,6 +76,8 @@ tags:
     description: Threat intelligence and risk scoring for IP addresses
   - name: LIBOR
     description: "SOFR-first benchmark rates with archival LIBOR history and tenor spreads"
+  - name: Logo
+    description: "Discover a company's logos, icons, and brand palette by domain"
   - name: Lorem Ipsum
     description: "Placeholder text generation as JSON, text, or HTML"
   - name: MAC Address
@@ -92,6 +96,8 @@ tags:
     description: SSRF-safe PDF rendering from a public URL or sanitized HTML
   - name: PDF Toolkit
     description: "Merge, split, extract, rotate, watermark, compress, encrypt, and inspect PDFs"
+  - name: Ping Human
+    description: "Escalate a decision to a human via Slack or email and collect the reply"
   - name: Profanity
     description: Content moderation and profanity detection
   - name: Public Holidays
@@ -104,6 +110,10 @@ tags:
     description: "SEC EDGAR company profiles, filings, and XBRL facts"
   - name: Spell Check
     description: Multilingual spelling correction with optional grammar hints
+  - name: Structured Extraction
+    description: "Extract structured fields from a web page or HTML using CSS selectors"
+  - name: Tech Stack Detection
+    description: "Detect the technologies a website uses"
   - name: Text Language
     description: Language detection with ISO codes and confidence scores
   - name: Thesaurus
@@ -9455,6 +9465,350 @@ paths:
                 owner_password:
                   type: string
                   description: "Encrypt: owner password"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /breach-check/check:
+    get:
+      tags:
+        - Breach Check
+      operationId: breachCheckCheck
+      summary: "Check one email for known breaches"
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: "Email address"
+          schema:
+            type: string
+            example: "test@example.com"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+    post:
+      tags:
+        - Breach Check
+      operationId: breachCheckCheckBatch
+      summary: "Check up to 25 emails for known breaches"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - emails
+              properties:
+                emails:
+                  type: array
+                  description: "JSON array or comma-separated emails (1-25)"
+                  items: {}
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /breach-check/password:
+    get:
+      tags:
+        - Breach Check
+      operationId: breachCheckPassword
+      summary: "Check a SHA-1 hash prefix against breached passwords"
+      parameters:
+        - name: hash_prefix
+          in: query
+          required: true
+          description: "First 5 hex characters of the password's SHA-1"
+          schema:
+            type: string
+            example: "5BAA6"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /breach-check/breaches:
+    get:
+      tags:
+        - Breach Check
+      operationId: breachCheckBreaches
+      summary: "List known breaches"
+      parameters:
+        - name: domain
+          in: query
+          required: false
+          description: "Filter by breached domain"
+          schema:
+            type: string
+            example: "adobe.com"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /logo/discover:
+    get:
+      tags:
+        - Logo
+      operationId: logoDiscover
+      summary: "Discover logos and brand colors for a domain"
+      parameters:
+        - name: domain
+          in: query
+          required: true
+          description: "Company domain"
+          schema:
+            type: string
+            example: "stripe.com"
+        - name: includePalette
+          in: query
+          required: false
+          description: "Include brand color palette (default true)"
+          schema:
+            type: boolean
+            example: "false"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /ping-human/escalations:
+    post:
+      tags:
+        - Ping Human
+      operationId: pingHumanCreate
+      summary: "Create an escalation and notify humans"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - context
+                - channels
+              properties:
+                title:
+                  type: string
+                  description: "Short title (1-200 characters)"
+                context:
+                  type: string
+                  description: "Decision context (1-8000 characters)"
+                channels:
+                  type: array
+                  description: "JSON array of {\"type\":\"email\",\"to\":...} or {\"type\":\"slack\",\"webhook_url\":...} (1-3)"
+                  items: {}
+                options:
+                  type: array
+                  description: "JSON array of {\"id\",\"label\"} choices (2-6)"
+                  items: {}
+                fields:
+                  type: array
+                  description: "JSON array of {\"name\",\"type\",\"label\",\"required\"} inputs (max 5)"
+                  items: {}
+                ttl_seconds:
+                  type: integer
+                  description: "Expiry in seconds (60-86400, default 3600)"
+                callback:
+                  type: object
+                  description: "Callback JSON {\"url\",\"secret\"} for signed reply delivery"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /ping-human/escalations/{id}:
+    get:
+      tags:
+        - Ping Human
+      operationId: pingHumanGet
+      summary: "Get an escalation's status and reply"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Escalation ID"
+          schema:
+            type: string
+            example: "esc_123"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+    delete:
+      tags:
+        - Ping Human
+      operationId: pingHumanCancel
+      summary: "Cancel an open escalation"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Escalation ID"
+          schema:
+            type: string
+            example: "esc_123"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /structured-extraction/extract:
+    post:
+      tags:
+        - Structured Extraction
+      operationId: structuredExtractionExtract
+      summary: "Extract fields from a URL or HTML"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - selectors
+              properties:
+                selectors:
+                  type: object
+                  description: "Selector map JSON, e.g. {\"title\":\"h1\"}"
+                url:
+                  type: string
+                  description: "Public HTTP(S) page URL (or pass --html)"
+                html:
+                  type: string
+                  description: "Raw HTML (or pass --url)"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        default:
+          $ref: "#/components/responses/ServiceUnavailable"
+  /tech-stack-detection/detect:
+    get:
+      tags:
+        - Tech Stack Detection
+      operationId: techStackDetectionDetect
+      summary: "Detect technologies for a domain"
+      parameters:
+        - name: domain
+          in: query
+          required: true
+          description: "Domain to analyze"
+          schema:
+            type: string
+            example: "example.com"
+        - name: url
+          in: query
+          required: false
+          description: "Specific page URL to analyze"
+          schema:
+            type: string
+            example: "https://example.com/pricing"
       responses:
         "200":
           description: Success
