@@ -266,6 +266,23 @@
         "spec.yaml"
       ],
       "validated_outcome": "Table-driven tests assert method, path, and wire params for every declared endpoint plus required-flag enforcement; go test ./... passes."
+    },
+    {
+      "id": "declared-api-mcp-spec-rates",
+      "summary": "Register typed MCP tools and a spec.yaml parity test for table-declared APIs; add libor and mortgage-calculator.",
+      "reason": "MCP params and the published OpenAPI must match CLI wiring for every declared endpoint; libor and mortgage-calculator are in the staging 63-API catalog.",
+      "files": [
+        "internal/mcp/declared_tools.go",
+        "internal/mcp/declared_tools_test.go",
+        "internal/mcp/tools.go",
+        "internal/cli/declared_api_spec_test.go",
+        "internal/cli/libor.go",
+        "internal/cli/mortgage-calculator.go",
+        "internal/cli/active-apis.json",
+        "internal/cli/active_apis_test.go",
+        "spec.yaml"
+      ],
+      "validated_outcome": "MCP test asserts each declared endpoint has a tool with all params; spec parity test covers every declared operation and wire param; go test ./... passes."
     }
   ]
 }

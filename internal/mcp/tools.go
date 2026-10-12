@@ -1222,6 +1222,8 @@ func RegisterTools(s *server.MCPServer) {
 		handleContext,
 	)
 
+	registerDeclaredAPITools(s)
+
 	// Runtime Cobra-tree mirror — exposes every user-facing command that is
 	// not already covered by a typed endpoint or framework MCP tool.
 	cobratree.RegisterAll(s, cli.RootCmd(), cobratree.SiblingCLIPath)
@@ -1917,6 +1919,7 @@ func handleContext(_ context.Context, _ mcplib.CallToolRequest) (*mcplib.CallToo
 			{"topic": "Activity tracking", "insight": "When checking deal activity, sync first and query locally. CRM APIs often throttle activity-log endpoints heavily."},
 		},
 	}
+	ctx["resources"] = append(ctx["resources"].([]map[string]any), declaredContextResources()...)
 	data, _ := json.MarshalIndent(ctx, "", "  ")
 	return mcplib.NewToolResultText(string(data)), nil
 }
