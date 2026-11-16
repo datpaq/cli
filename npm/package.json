@@ -1,6 +1,6 @@
 {
   "name": "datpaq",
-  "version": "1.6.0",
+  "version": "2.0.12",
   "description": "Official CLI for the Datpaq API",
   "homepage": "https://github.com/datpaq/cli",
   "repository": {
